@@ -24,11 +24,12 @@ import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { filterEntries, summarize } from '@/domain/ledger/selectors'
 import type { EntryDraft } from '@/domain/ledger/types'
 import { useCategories } from '@/features/categories/use-categories'
-import { CurrencyPicker } from '@/features/currency/currency-picker'
 import { useCurrency } from '@/features/currency/use-currency'
 import { EntryComposer } from '@/features/entries/entry-composer'
 import { EntryTable } from '@/features/entries/entry-table'
+
 import { useLedger } from '@/features/ledger/use-ledger'
+import { SettingsDialog, type SettingsValues } from '@/features/settings/settings-dialog'
 import { ActiveFilters, FilterPopover } from '@/features/statistics/filter-popover'
 import { SummaryCards } from '@/features/statistics/summary-cards'
 import { useTheme } from '@/features/theme/use-theme'
@@ -44,12 +45,13 @@ type View = 'overview' | 'entries'
 
 export function App() {
   const ledger = useLedger()
-  const { theme, toggleTheme } = useTheme()
+  const { theme, setTheme, themeColor, setThemeColor, toggleTheme } = useTheme()
   const { currency, setCurrency } = useCurrency()
   const { categories, actions } = useCategories()
   const [view, setView] = useState<View>('overview')
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS })
   const [addOpen, setAddOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [entryFocusKey, setEntryFocusKey] = useState(0)
   const selected = ledger.selectedLedger
   // An overflow must leave original records available for inspection and saving.
@@ -102,17 +104,27 @@ export function App() {
       if (id === selected.id) resetView()
     },
   }
-  function switchCurrency(next: CurrencyCode) {
-    if (next === currency) return
+  function switchCurrency(next: CurrencyCode): boolean {
+    if (next === currency) return true
     try {
       const nextFilters = convertFilters(filters, currency, next)
       // Validate the active filter after conversion before changing its unit.
       filterEntries([], nextFilters)
       setCurrency(next)
       setFilters(nextFilters)
+      return true
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '无法切换币种。')
+      return false
     }
+  }
+  function saveSettings(values: SettingsValues): boolean {
+    if (!switchCurrency(values.currency)) return false
+    setTheme(values.theme)
+    setThemeColor(values.themeColor)
+    ledger.setDefaultDirectory(values.defaultDirectory)
+    toast.success('设置已保存')
+    return true
   }
   async function submitEntry(draft: EntryDraft, entryCurrency: CurrencyCode) {
     const ok = await ledger.add(draft, entryCurrency, selected.id)
@@ -127,6 +139,7 @@ export function App() {
         ledger={navigation}
         theme={theme}
         toggleTheme={toggleTheme}
+        onOpenSettings={() => setSettingsOpen(true)}
         onSelectDate={(id, date) => {
           if (ledger.isBusy) return
           ledger.selectLedger(id)
@@ -155,11 +168,6 @@ export function App() {
             </Badge>
           </div>
           <div className="flex shrink-0 items-center justify-end gap-2">
-            <CurrencyPicker
-              currency={currency}
-              onChange={switchCurrency}
-              disabled={ledger.isBusy}
-            />
             <Button
               variant="outline"
               size="sm"
@@ -283,6 +291,17 @@ export function App() {
         onCurrencyChange={switchCurrency}
         onSubmit={submitEntry}
         submitError={ledger.error}
+      />
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        currency={currency}
+        theme={theme}
+        themeColor={themeColor}
+        defaultDirectory={ledger.defaultDirectory}
+        directoryPickerSupported={ledger.directoryPickerSupported}
+        onChooseDirectory={ledger.chooseDefaultDirectory}
+        onSave={saveSettings}
       />
       <Toaster theme={theme} position="bottom-right" offset={{ bottom: 96, right: 24 }} />
     </SidebarProvider>

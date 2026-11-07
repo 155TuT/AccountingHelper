@@ -12,22 +12,22 @@ React 状态保存多个账本会话、当前账本及账目选择和筛选条�
 
 ## 模块职责
 
-| 目录                     | 职责                                             | 主要入口                                                                 |
-| ------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------ |
-| `app`                    | 页面布局、导航、功能组合                         | `app.tsx`、`app-sidebar.tsx`                                             |
-| `components/ui`          | shadcn 基础组件源码                              | Card、Table、Input、Sidebar、Chart 等                                    |
-| `domain/ledger`          | 类型、默认类别、金额、日期、筛选、排序和统计     | `types.ts`、`categories.ts`、`validation.ts`、`money.ts`、`selectors.ts` |
-| `infrastructure/storage` | 文件授权、读写、JSONL 校验与序列化、类别本地存储 | `file-system.ts`、`jsonl.ts`、`category-storage.ts`                      |
-| `features/categories`    | 本地类别目录、增删改查与管理弹层                 | `use-categories.ts`、`category-manager-dialog.tsx`                       |
-| `domain/currency`        | 六种币种、参考换算、展示投影与筛选阈值换算       | `currencies.ts`、`projection.ts`                                         |
-| `features/currency`      | 全局币种和选择器                                 | `use-currency.ts`、`currency-picker.tsx`                                 |
-| `features/ledger`        | 当前账本、异步状态、错误反馈                     | `workspace.ts`、`use-ledger.ts`、`ledger-tree.tsx`                       |
-| `features/entries`       | 记账表单、最近记录与分页表格                     | `entry-composer.tsx`、`entry-form.tsx`、`entry-table.tsx`                |
-| `features/statistics`    | 筛选表单、汇总和图表                             | `filter-popover.tsx`、`summary-cards.tsx`、`charts.tsx`                  |
-| `features/theme`         | 当前页面的深浅色状态                             | `use-theme.ts`                                                           |
-| `styles`                 | 颜色、间距基础与全局主题                         | `globals.css`                                                            |
-
-依赖由外向内：`app` 组合 `features`；`features` 调用 `domain`、`infrastructure` 和 `components/ui`；`infrastructure` 复用 `domain` 的校验规则。`domain` 只依赖 TypeScript 和标准 JavaScript API，`components/ui` 保持通用。
+| 目录                                                                                                                                                                                                                        | 职责                                             | 主要入口                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
+| `app`                                                                                                                                                                                                                       | 页面布局、导航、功能组合                         | `app.tsx`、`app-sidebar.tsx`                                             |
+| `components/ui`                                                                                                                                                                                                             | shadcn 基础组件源码                              | Card、Table、Input、Sidebar、Chart 等                                    |
+| `domain/ledger`                                                                                                                                                                                                             | 类型、默认类别、金额、日期、筛选、排序和统计     | `types.ts`、`categories.ts`、`validation.ts`、`money.ts`、`selectors.ts` |
+| `infrastructure/storage`                                                                                                                                                                                                    | 文件授权、读写、JSONL 校验与序列化、类别本地存储 | `file-system.ts`、`jsonl.ts`、`category-storage.ts`                      |
+| `features/categories`                                                                                                                                                                                                       | 本地类别目录、增删改查与管理弹层                 | `use-categories.ts`、`category-manager-dialog.tsx`                       |
+| `domain/currency`                                                                                                                                                                                                           | 六种币种、参考换算、展示投影与筛选阈值换算       | `currencies.ts`、`projection.ts`                                         |
+| `features/currency`                                                                                                                                                                                                         | 全局币种和选择器                                 | `use-currency.ts`、`currency-picker.tsx`                                 |
+| `features/ledger`                                                                                                                                                                                                           | 当前账本、默认目录、异步状态与错误反馈           | `workspace.ts`、`use-ledger.ts`、`ledger-tree.tsx`                       |
+| `features/entries`                                                                                                                                                                                                          | 记账表单、最近记录与分页表格                     | `entry-composer.tsx`、`entry-form.tsx`、`entry-table.tsx`                |
+| `features/settings`                                                                                                                                                                                                         | 全局币种、六套主题色、深浅模式和默认目录         | `settings-dialog.tsx`                                                    |
+| `features/statistics`                                                                                                                                                                                                       | 筛选表单、汇总和图表                             | `filter-popover.tsx`、`summary-cards.tsx`、`charts.tsx`                  |
+| `features/theme`                                                                                                                                                                                                            | 六套主题色与深浅模式状态                         | `use-theme.ts`                                                           |
+| `styles`                                                                                                                                                                                                                    | 颜色、间距基础与全局主题                         | `globals.css`                                                            |
+| 依赖由外向内：`app` 组合 `features`；`features` 调用 `domain`、`infrastructure` 和 `components/ui`；`infrastructure` 复用 `domain` 的校验规则。`domain` 只依赖 TypeScript 和标准 JavaScript API，`components/ui` 保持通用。 |
 
 ## 一笔账目的保存
 
@@ -59,7 +59,7 @@ React 状态保存多个账本会话、当前账本及账目选择和筛选条�
 
 交互控件、卡片、状态、表格和空状态均由 `components/ui` 中的 shadcn 组件组合。侧栏操作在悬停和键盘聚焦时显示功能提示。`EntryComposer` 通过非模态 Popover 将单张 `EntryForm` 卡片锚定到右下角按钮；保存期间禁止关闭，失败保留输入。布局使用 Grid 和 Flex，桌面内容最小宽度为 1200px。基础组件来自官方 registry 的 `new-york` 风格，`components.json` 记录生成配置。
 
-主色在全部币种下统一为紫色，币种状态仅负责金额与显示单位。图标使用 `components.json` 中配置的 Lucide 图标库；按钮、提示、卡片和弹层统一组合 shadcn 基础组件。主题颜色集中在 CSS 变量中，深浅色分别配置卡片、边框、文字和图表色。每次打开页面使用系统颜色偏好，手动切换保留在 React 状态中；HTML 中的初始化脚本在 React 渲染前应用主题，减少闪烁。账目、筛选和主题都只在当前页面存续。
+主色由独立于币种的全局主题色设置决定，提供紫色、青色、蓝色、玫红、琥珀和绿色六套深浅色配色。图标使用 `components.json` 中配置的 Lucide 图标库；按钮、提示、卡片和弹层统一组合 shadcn 基础组件。主题颜色集中在 CSS 变量中，深浅色分别配置卡片、边框、文字和图表色。每次打开页面使用系统颜色偏好，手动切换保留在 React 状态中；HTML 中的初始化脚本在 React 渲染前应用深浅模式，减少闪烁。全局设置通过 Dialog 覆盖主页面，保存后一次性应用币种、主题色、深浅模式和默认目录。默认目录句柄仅保存在当前页面会话，并作为 `showSaveFilePicker` 的 `startIn`。账目、筛选、主题和目录都只在当前页面存续。
 
 界面通过卡片、Tabs、表单标签、间距和按钮提示表达层级，币种菜单和图表省去重复说明。浮动卡片使用统一圆角和间距，顶部图标按钮保留可访问名称及键盘提交。
 

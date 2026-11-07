@@ -1,4 +1,4 @@
-import { Moon, Sun } from 'lucide-react'
+import { Moon, Settings, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sidebar,
@@ -19,9 +19,16 @@ interface AppSidebarProps {
   theme: Theme
   onSelectDate(id: string, date: string): void
   toggleTheme(): void
+  onOpenSettings(): void
 }
 
-export function AppSidebar({ ledger, theme, toggleTheme, onSelectDate }: AppSidebarProps) {
+export function AppSidebar({
+  ledger,
+  theme,
+  toggleTheme,
+  onOpenSettings,
+  onSelectDate,
+}: AppSidebarProps) {
   return (
     <Sidebar collapsible="none" className="sticky top-0 h-svh shrink-0 border-r">
       <SidebarHeader className="h-(--toolbar-height) justify-center px-5">
@@ -46,19 +53,36 @@ export function AppSidebar({ ledger, theme, toggleTheme, onSelectDate }: AppSide
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t px-3 py-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={theme === 'dark' ? '切换浅色' : '切换深色'}
-              onClick={toggleTheme}
-            >
-              {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{theme === 'dark' ? '切换浅色' : '切换深色'}</TooltipContent>
-        </Tooltip>
+        <div className="flex items-center justify-between">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={theme === 'dark' ? '切换浅色' : '切换深色'}
+                onClick={toggleTheme}
+              >
+                {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {theme === 'dark' ? '切换浅色' : '切换深色'}
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="打开全局设置"
+                onClick={onOpenSettings}
+              >
+                <Settings className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">全局设置</TooltipContent>
+          </Tooltip>
+        </div>
       </SidebarFooter>
     </Sidebar>
   )

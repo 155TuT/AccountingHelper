@@ -14,6 +14,10 @@ export interface LedgerFileHandle {
   createWritable(options?: { mode: 'exclusive' }): Promise<LedgerWritable>
 }
 
+export interface LedgerDirectoryHandle {
+  name: string
+}
+
 export interface FileSession {
   handle: LedgerFileHandle
   snapshot: string
@@ -24,11 +28,17 @@ interface PickerOptions {
   excludeAcceptAllOption: boolean
   suggestedName?: string
   multiple?: boolean
+  startIn?: LedgerDirectoryHandle
+}
+
+interface DirectoryPickerOptions {
+  mode: 'readwrite'
 }
 
 interface FilePickerApi {
   showOpenFilePicker?(options: PickerOptions): Promise<LedgerFileHandle[]>
   showSaveFilePicker?(options: PickerOptions): Promise<LedgerFileHandle>
+  showDirectoryPicker?(options: DirectoryPickerOptions): Promise<LedgerDirectoryHandle>
 }
 
 const pickerOptions: PickerOptions = {
@@ -46,6 +56,16 @@ export function supportsFileSystem(): boolean {
     typeof pickers().showOpenFilePicker === 'function' &&
     typeof pickers().showSaveFilePicker === 'function'
   )
+}
+
+export function supportsDirectoryPicker(): boolean {
+  return window.isSecureContext && typeof pickers().showDirectoryPicker === 'function'
+}
+
+export async function pickDefaultDirectory(): Promise<LedgerDirectoryHandle> {
+  const pick = pickers().showDirectoryPicker
+  if (!pick) throw new Error('请使用桌面版 Chrome 或 Edge 选择默认保存目录。')
+  return pick.call(window, { mode: 'readwrite' })
 }
 
 export async function openLedgerFile() {
@@ -93,10 +113,15 @@ async function writeFile(handle: LedgerFileHandle, content: string): Promise<voi
 export async function createLedgerFile(
   entries: readonly LedgerEntry[],
   checkTarget?: (handle: LedgerFileHandle) => Promise<void>,
+  startIn?: LedgerDirectoryHandle | null,
 ): Promise<FileSession> {
   const save = pickers().showSaveFilePicker
   if (!save) throw new Error('请使用桌面版 Chrome 或 Edge 保存账本。')
-  const handle = await save.call(window, { ...pickerOptions, suggestedName: '我的账本.jsonl' })
+  const handle = await save.call(window, {
+    ...pickerOptions,
+    suggestedName: '我的账本.jsonl',
+    ...(startIn ? { startIn } : {}),
+  })
   await checkTarget?.(handle)
   const snapshot = serializeJsonl(entries)
   await writeFile(handle, snapshot)

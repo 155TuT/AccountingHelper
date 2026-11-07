@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createEntry } from '@/domain/ledger/validation'
 import { CategoryChart } from '@/features/statistics/charts'
+import { THEME_COLORS } from '@/features/theme/use-theme'
 import { EntryTable } from './entry-table'
 import { EntryForm } from './entry-form'
 const entry = createEntry(
@@ -16,6 +17,16 @@ const entry = createEntry(
 )
 
 describe('界面输出回归', () => {
+  it('全局设置提供六套主题色', () => {
+    expect(THEME_COLORS.map((color) => color.label)).toEqual([
+      '紫色',
+      '青色',
+      '蓝色',
+      '玫红',
+      '琥珀',
+      '绿色',
+    ])
+  })
   it('表格按币种显示金额，备注按文本转义', () => {
     const html = renderToStaticMarkup(
       <EntryTable entries={[entry]} hasFilters={false} onViewAll={() => {}} />,

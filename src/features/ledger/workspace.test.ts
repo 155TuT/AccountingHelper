@@ -42,16 +42,29 @@ function file(name = '账本.jsonl', initial = '', failClose = false) {
 afterEach(() => vi.unstubAllGlobals())
 function setup(open: LedgerFileHandle[] = [], save = file().handle) {
   const picker = vi.fn(async () => open)
+  const savePicker = vi.fn(async () => save)
   vi.stubGlobal('window', {
     showOpenFilePicker: picker,
-    showSaveFilePicker: vi.fn(async () => save),
+    showSaveFilePicker: savePicker,
   })
   const notify = vi.fn()
   const controller = createWorkspaceController(undefined, notify)
-  return { controller, picker, notify }
+  return { controller, picker, savePicker, notify }
 }
 
 describe('多账本与文件提交', () => {
+  it('默认保存目录会作为新账本保存选择器的起点', async () => {
+    const target = file()
+    const { controller, savePicker } = setup([], target.handle)
+    const directory = { name: '默认账本目录' }
+    controller.setDefaultDirectory(directory)
+    expect(controller.getSnapshot().defaultDirectory).toBe(directory)
+    expect(await controller.add(draft, 'CNY')).toBe(true)
+    expect(savePicker).toHaveBeenCalledWith(expect.objectContaining({ startIn: directory }))
+    controller.setDefaultDirectory(null)
+    expect(controller.getSnapshot().defaultDirectory).toBeNull()
+  })
+
   it('首笔直接保存所选币种，重开和切换展示不会改变原币金额', async () => {
     const target = file()
     const { controller } = setup([], target.handle)

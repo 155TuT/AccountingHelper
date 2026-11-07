@@ -1,6 +1,6 @@
 import { useState, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
-import { supportsFileSystem } from '@/infrastructure/storage/file-system'
+import { supportsDirectoryPicker, supportsFileSystem } from '@/infrastructure/storage/file-system'
 import { createWorkspaceController } from './workspace'
 
 export function useLedger() {
@@ -16,6 +16,7 @@ export function useLedger() {
     selectedEntry:
       selectedLedger.entries.find((entry) => entry.id === state.selectedEntryId) ?? null,
     fileSystemSupported: supportsFileSystem(),
+    directoryPickerSupported: supportsDirectoryPicker(),
   }
 }
 export type LedgerApi = ReturnType<typeof useLedger>
