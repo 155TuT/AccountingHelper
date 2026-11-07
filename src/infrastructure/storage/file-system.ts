@@ -9,6 +9,7 @@ export interface LedgerWritable {
 
 export interface LedgerFileHandle {
   name: string
+  isSameEntry?(other: LedgerFileHandle): Promise<boolean>
   getFile(): Promise<{ text(): Promise<string> }>
   createWritable(options?: { mode: 'exclusive' }): Promise<LedgerWritable>
 }
@@ -56,6 +57,28 @@ export async function openLedgerFile() {
   return { entries: parseJsonl(snapshot), session: { handle, snapshot } }
 }
 
+export async function openLedgerFiles() {
+  const open = pickers().showOpenFilePicker
+  if (!open) throw new Error('请使用桌面版 Chrome 或 Edge 打开账本。')
+  const handles = await open.call(window, { ...pickerOptions, multiple: true })
+  if (!handles.length) throw new DOMException('操作已取消', 'AbortError')
+  return Promise.all(
+    handles.map(async (handle) => {
+      try {
+        const snapshot = await (await handle.getFile()).text()
+        return { entries: parseJsonl(snapshot), session: { handle, snapshot } }
+      } catch (cause) {
+        if (cause instanceof DOMException) throw cause
+        throw new Error(`${handle.name}：${fileErrorMessage(cause)}`)
+      }
+    }),
+  )
+}
+
+export async function sameFile(a: LedgerFileHandle, b: LedgerFileHandle): Promise<boolean> {
+  return a === b || !!(await a.isSameEntry?.(b))
+}
+
 async function writeFile(handle: LedgerFileHandle, content: string): Promise<void> {
   const stream = await handle.createWritable({ mode: 'exclusive' })
   try {
@@ -67,10 +90,14 @@ async function writeFile(handle: LedgerFileHandle, content: string): Promise<voi
   }
 }
 
-export async function createLedgerFile(entries: readonly LedgerEntry[]): Promise<FileSession> {
+export async function createLedgerFile(
+  entries: readonly LedgerEntry[],
+  checkTarget?: (handle: LedgerFileHandle) => Promise<void>,
+): Promise<FileSession> {
   const save = pickers().showSaveFilePicker
   if (!save) throw new Error('请使用桌面版 Chrome 或 Edge 保存账本。')
   const handle = await save.call(window, { ...pickerOptions, suggestedName: '我的账本.jsonl' })
+  await checkTarget?.(handle)
   const snapshot = serializeJsonl(entries)
   await writeFile(handle, snapshot)
   return { handle, snapshot }

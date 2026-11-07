@@ -32,7 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { PAGE_SIZE } from '@/domain/ledger/constants'
-import { formatMoney } from '@/domain/ledger/money'
+import { formatCurrency } from '@/domain/ledger/money'
 import { sortEntries } from '@/domain/ledger/selectors'
 import type { LedgerEntry } from '@/domain/ledger/types'
 import { cn } from '@/lib/utils'
@@ -144,7 +144,8 @@ export function EntryTable({ entries, showAll = false, hasFilters, onViewAll }: 
                         entry.type === 'income' && 'text-income',
                       )}
                     >
-                      {entry.type === 'income' ? '+' : '−'}¥{formatMoney(entry.amountCents)}
+                      {entry.type === 'income' ? '+' : '−'}
+                      {formatCurrency(entry.amountCents, entry.currency)}
                     </TableCell>
                   </TableRow>
                 )

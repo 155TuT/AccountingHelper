@@ -18,10 +18,11 @@ import type { Theme } from '@/features/theme/use-theme'
 interface AppSidebarProps {
   ledger: LedgerApi
   theme: Theme
+  onSelectDate(id: string, date: string): void
   toggleTheme(): void
 }
 
-export function AppSidebar({ ledger, theme, toggleTheme }: AppSidebarProps) {
+export function AppSidebar({ ledger, theme, toggleTheme, onSelectDate }: AppSidebarProps) {
   return (
     <Sidebar collapsible="none" className="sticky top-0 h-svh shrink-0 border-r">
       <SidebarHeader className="h-22 justify-center px-5">
@@ -38,7 +39,7 @@ export function AppSidebar({ ledger, theme, toggleTheme }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent className="px-1">
         <SidebarGroup className="h-full p-1">
-          <LedgerTree ledger={ledger} />
+          <LedgerTree ledger={ledger} onSelectDate={onSelectDate} />
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t px-3 py-2">

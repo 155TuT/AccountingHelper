@@ -14,7 +14,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:ledger": "vitest run src/domain/ledger/ledger.test.ts",
+    "test:currency": "vitest run src/domain/currency",
+    "test:categories": "vitest run src/domain/ledger/categories.test.ts src/infrastructure/storage/category-storage.test.ts",
+    "test:storage": "vitest run src/infrastructure/storage/storage.test.ts test/robustness.test.ts",
+    "test:workspace": "vitest run src/features/ledger/workspace.test.ts",
+    "test:integration": "vitest run test/acceptance.test.ts test/integration.test.ts",
+    "test:ui": "vitest run src/features/entries/ui.test.tsx"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

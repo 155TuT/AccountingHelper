@@ -25,8 +25,10 @@ const TYPE_LABELS: Record<EntryType, string> = {
 export function CategoryManagerDialog({
   categories,
   actions,
+  disabled,
 }: {
   categories: CategoryCatalog
+  disabled?: boolean
   actions: CategoryActions
 }) {
   const [open, setOpen] = useState(false)
@@ -54,6 +56,7 @@ export function CategoryManagerDialog({
 
   function add(event: FormEvent) {
     event.preventDefault()
+    event.stopPropagation()
     const message = actions.add(type, name)
     if (message) {
       setError(message)
@@ -105,6 +108,7 @@ export function CategoryManagerDialog({
       <DialogTrigger asChild>
         <Button
           type="button"
+          disabled={disabled}
           variant="ghost"
           size="xs"
           className="gap-1.5 px-2 text-muted-foreground"
@@ -162,6 +166,7 @@ export function CategoryManagerDialog({
                     onKeyDown={(event) => {
                       if (event.key === 'Enter') {
                         event.preventDefault()
+                        event.stopPropagation()
                         rename(category)
                       }
                       if (event.key === 'Escape') clearTransient()

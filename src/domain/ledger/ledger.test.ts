@@ -22,6 +22,7 @@ const entries: LedgerEntry[] = [
     category: '饮食',
     note: '午餐',
     createdAt: '2026-11-06T12:00:00+08:00',
+    currency: 'CNY',
   },
   {
     id: '2',
@@ -31,6 +32,7 @@ const entries: LedgerEntry[] = [
     category: '交通',
     note: '',
     createdAt: '2026-11-07T08:00:00+08:00',
+    currency: 'CNY',
   },
   {
     id: '3',
@@ -40,6 +42,7 @@ const entries: LedgerEntry[] = [
     category: '工资',
     note: '',
     createdAt: '2026-11-07T01:00:00Z',
+    currency: 'CNY',
   },
 ]
 

@@ -2,10 +2,18 @@ import { ArrowDownLeft, ArrowUpRight, Wallet } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatMoney } from '@/domain/ledger/money'
+import { currencyInfo, type CurrencyCode } from '@/domain/currency/currencies'
 import type { LedgerTotals } from '@/domain/ledger/types'
 import { cn } from '@/lib/utils'
 
-export function SummaryCards({ totals }: { totals: LedgerTotals }) {
+export function SummaryCards({
+  totals,
+  currency,
+}: {
+  totals: LedgerTotals
+  currency: CurrencyCode
+}) {
+  const symbol = currencyInfo(currency).symbol
   const metrics = [
     {
       title: '总收入',
@@ -34,7 +42,7 @@ export function SummaryCards({ totals }: { totals: LedgerTotals }) {
             </CardAction>
           </CardHeader>
           <CardContent className="flex items-baseline gap-2">
-            <span className="text-xl text-muted-foreground">¥</span>
+            <span className="text-xl text-muted-foreground">{symbol}</span>
             <span className="text-[32px] leading-none font-semibold tracking-tight tabular-nums">
               {formatMoney(value)}
             </span>

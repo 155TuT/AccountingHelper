@@ -3,6 +3,8 @@ import type { EntryType, LedgerEntry, LedgerFilters, LedgerTotals } from './type
 import { isValidDate } from './validation'
 
 export function summarize(entries: readonly LedgerEntry[]): LedgerTotals {
+  if (new Set(entries.map((entry) => entry.currency)).size > 1)
+    throw new Error('请先将账目换算为同一币种再统计。')
   let income = 0
   let expense = 0
   for (const entry of entries) {
@@ -58,6 +60,7 @@ export function sortEntries(entries: readonly LedgerEntry[]): LedgerEntry[] {
 }
 
 export function dailyTotals(entries: readonly LedgerEntry[]) {
+  summarize(entries)
   const days = new Map<string, { date: string; income: number; expense: number }>()
   for (const entry of entries) {
     const day = days.get(entry.date) ?? { date: entry.date, income: 0, expense: 0 }
@@ -72,6 +75,7 @@ export function categoryTotals(entries: readonly LedgerEntry[]) {
 }
 
 export function categoryBreakdown(entries: readonly LedgerEntry[], type: EntryType) {
+  summarize(entries)
   const categories = new Map<string, { category: string; amount: number; count: number }>()
   for (const entry of entries) {
     if (entry.type !== type) continue

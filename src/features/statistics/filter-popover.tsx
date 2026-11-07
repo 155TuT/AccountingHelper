@@ -1,3 +1,4 @@
+import { currencyInfo, type CurrencyCode } from '@/domain/currency/currencies'
 import { useState, type FormEvent } from 'react'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { DatePicker } from '@/components/date-picker'
@@ -20,15 +21,18 @@ import type { LedgerFilters } from '@/domain/ledger/types'
 export function FilterPopover({
   filters,
   categories,
+  currency,
   onApply,
 }: {
   filters: LedgerFilters
+  currency: CurrencyCode
   categories: readonly string[]
   onApply(filters: LedgerFilters): void
 }) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(filters)
   const [error, setError] = useState('')
+  const unit = currencyInfo(currency).unit
   const count = Object.values(filters).filter(Boolean).length
   const options =
     draft.category && !categories.includes(draft.category)
@@ -106,7 +110,7 @@ export function FilterPopover({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="filter-min">最低金额（元）</FieldLabel>
+                <FieldLabel htmlFor="filter-min">最低金额（{unit}）</FieldLabel>
                 <Input
                   id="filter-min"
                   inputMode="decimal"
@@ -116,7 +120,7 @@ export function FilterPopover({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="filter-max">最高金额（元）</FieldLabel>
+                <FieldLabel htmlFor="filter-max">最高金额（{unit}）</FieldLabel>
                 <Input
                   id="filter-max"
                   inputMode="decimal"
@@ -128,8 +132,10 @@ export function FilterPopover({
               <Field className="col-span-2">
                 <FieldLabel htmlFor="filter-category">类别</FieldLabel>
                 <Select
-                  value={draft.category || 'all'}
-                  onValueChange={(value) => update('category', value === 'all' ? '' : value)}
+                  value={draft.category ? `category:${draft.category}` : 'all'}
+                  onValueChange={(value) =>
+                    update('category', value === 'all' ? '' : value.slice('category:'.length))
+                  }
                 >
                   <SelectTrigger id="filter-category" className="w-full">
                     <SelectValue />
@@ -137,7 +143,7 @@ export function FilterPopover({
                   <SelectContent>
                     <SelectItem value="all">全部类别</SelectItem>
                     {options.map((category) => (
-                      <SelectItem key={category} value={category}>
+                      <SelectItem key={category} value={`category:${category}`}>
                         {category}
                       </SelectItem>
                     ))}
@@ -166,13 +172,20 @@ export function FilterPopover({
   )
 }
 
-export function ActiveFilters({ filters }: { filters: LedgerFilters }) {
+export function ActiveFilters({
+  filters,
+  currency,
+}: {
+  filters: LedgerFilters
+  currency: CurrencyCode
+}) {
+  const symbol = currencyInfo(currency).symbol
   const labels = [
     (filters.startDate || filters.endDate) &&
       `${filters.startDate || '最早'} 至 ${filters.endDate || '至今'}`,
     filters.category,
     (filters.minAmount || filters.maxAmount) &&
-      `¥${filters.minAmount || '0'} — ${filters.maxAmount ? `¥${filters.maxAmount}` : '不限'}`,
+      `${symbol}${filters.minAmount || '0'} — ${filters.maxAmount ? `${symbol}${filters.maxAmount}` : '不限'}`,
   ].filter(Boolean)
   if (!labels.length) return null
   return (

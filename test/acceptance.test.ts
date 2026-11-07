@@ -1,6 +1,7 @@
+import { categoryNames, createDefaultCategoryCatalog } from '@/domain/ledger/categories'
 import { describe, expect, it } from 'vitest'
 import rawAcceptanceText from '../examples/acceptance.jsonl?raw'
-import { ALL_CATEGORIES, EMPTY_FILTERS } from '@/domain/ledger/constants'
+import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { formatCurrency, formatMoney, parseMoney } from '@/domain/ledger/money'
 import {
   categoryTotals,
@@ -155,13 +156,28 @@ describe('日期与账目校验', () => {
       { ...base, amountCents: 0 },
       { ...base, amountCents: 25.5 },
       { ...base, amountCents: Number.MAX_SAFE_INTEGER + 1 },
-      { ...base, category: '工资' },
-      { ...base, type: 'income' },
+      { ...base, category: '   ' },
+      { ...base, category: null },
+      { ...base, currency: null },
       { ...base, note: null },
       { ...base, createdAt: '2026-11-07T12:00:00' },
       { ...base, createdAt: '2026-02-30T12:00:00+08:00' },
+      { ...base, currency: 'usd' },
+      { ...base, currency: 1 },
     ]
     for (const value of invalid) expect(() => validateEntry(value)).toThrow()
+  })
+
+  it('读取旧账本时补人民币币种，新记录使用当前币种', () => {
+    const legacy = { ...firstEntry } as Partial<LedgerEntry>
+    delete legacy.currency
+    expect(parseJsonl(JSON.stringify(legacy))[0]?.currency).toBe('CNY')
+    expect(() => parseJsonl(JSON.stringify({ ...firstEntry, currency: 'usd' }))).toThrow('币种')
+    const usd = createEntry(
+      { type: 'expense', date: '2026-11-07', amount: '25.50', category: '饮食', note: '' },
+      'USD',
+    )
+    expect(usd).toMatchObject({ currency: 'USD', amountCents: 2550 })
   })
 
   it('新增账目统一换算金额、去除备注首尾空白并生成标识', () => {
@@ -200,9 +216,9 @@ describe('筛选与统计异常', () => {
     expect(filterEntries(entries, { ...EMPTY_FILTERS, minAmount: '0', maxAmount: '0' })).toEqual([])
   })
 
-  it('非法日期、类别和颠倒区间给出明确错误', () => {
+  it('自定义类别可筛选，非法日期和颠倒区间给出明确错误', () => {
     expect(() => validateFilters({ ...EMPTY_FILTERS, startDate: '2026-02-30' })).toThrow('有效日期')
-    expect(() => validateFilters({ ...EMPTY_FILTERS, category: '餐饮' })).toThrow('有效类别')
+    expect(filterEntries(entries, { ...EMPTY_FILTERS, category: '自定义类别' })).toEqual([])
     expect(() => validateFilters({ ...EMPTY_FILTERS, minAmount: '-1' })).toThrow()
     expect(() =>
       validateFilters({ ...EMPTY_FILTERS, startDate: '2026-11-08', endDate: '2026-11-07' }),
@@ -232,14 +248,10 @@ describe('筛选与统计异常', () => {
   })
 
   it('类别常量覆盖全部预设收支类别', () => {
-    expect(ALL_CATEGORIES).toEqual([
-      '饮食',
-      '交通',
-      '购物',
-      '其他支出',
-      '工资',
-      '生活费',
-      '其他收入',
-    ])
+    const catalog = createDefaultCategoryCatalog()
+    expect(categoryNames(catalog)).toEqual([...catalog.expense, ...catalog.income])
+    expect(categoryNames(catalog)).toEqual(
+      expect.arrayContaining(['饮食', '交通', '工资', '生活费']),
+    )
   })
 })

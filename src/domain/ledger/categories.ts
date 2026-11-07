@@ -100,7 +100,7 @@ export function categoryNames(
     ...catalog.income,
     ...entries.map((entry) => entry.category),
   ]) {
-    const key = categoryKey(name)
+    const key = name
     if (seen.has(key)) continue
     seen.add(key)
     names.push(name)
@@ -142,5 +142,6 @@ export function sanitizeCategoryCatalog(value: unknown): CategoryCatalog {
   const used = new Set<string>()
   const expense = sanitizeList(source.expense, DEFAULT_CATEGORY_CATALOG.expense, used)
   const income = sanitizeList(source.income, DEFAULT_CATEGORY_CATALOG.income, used)
+  if (!expense.length || !income.length) return createDefaultCategoryCatalog()
   return { expense, income }
 }

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { formatMoney } from '@/domain/ledger/money'
+import { formatCurrency } from '@/domain/ledger/money'
 import type { LedgerEntry } from '@/domain/ledger/types'
 import { cn } from '@/lib/utils'
 
@@ -23,8 +23,8 @@ function DetailRow({ label, children }: { label: string; children: ReactNode }) 
 export function EntryDetail({ entry }: EntryDetailProps) {
   if (!entry) {
     return (
-      <Card className="h-full min-h-96 border-dashed">
-        <CardContent className="flex h-full items-center justify-center">
+      <Card className="min-h-96 border-dashed">
+        <CardContent className="flex flex-1 items-center justify-center">
           <Empty className="min-h-0 border-none p-0">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -60,9 +60,10 @@ export function EntryDetail({ entry }: EntryDetailProps) {
         </DetailRow>
         <DetailRow label="类别">{entry.category}</DetailRow>
         <DetailRow label="日期">{entry.date}</DetailRow>
-        <DetailRow label="金额">
+        <DetailRow label={`原币金额（${entry.currency}）`}>
           <span className={cn('font-mono tabular-nums', isIncome && 'text-income')}>
-            {isIncome ? '+' : '−'}¥{formatMoney(entry.amountCents)}
+            {isIncome ? '+' : '−'}
+            {formatCurrency(entry.amountCents, entry.currency)}
           </span>
         </DetailRow>
         <DetailRow label="备注">
