@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowDownLeft, ArrowUpRight, LoaderCircle, Plus } from 'lucide-react'
 import { DatePicker } from '@/components/date-picker'
 import { Button } from '@/components/ui/button'
@@ -21,10 +21,11 @@ import { createEntry, localDate } from '@/domain/ledger/validation'
 interface EntryFormProps {
   isBusy: boolean
   disabled?: boolean
+  autoFocus?: boolean
   onSubmit(draft: EntryDraft): Promise<boolean>
 }
 
-export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
+export function EntryForm({ isBusy, disabled, autoFocus, onSubmit }: EntryFormProps) {
   const [draft, setDraft] = useState<EntryDraft>({
     type: 'expense',
     date: localDate(),
@@ -34,6 +35,10 @@ export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
   })
   const [error, setError] = useState('')
   const amountInput = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (autoFocus) amountInput.current?.focus()
+  }, [autoFocus])
 
   function update<K extends keyof EntryDraft>(key: K, value: EntryDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }))
