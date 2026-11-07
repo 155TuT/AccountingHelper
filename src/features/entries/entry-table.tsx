@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowDownLeft,
   ArrowRight,
@@ -49,24 +49,36 @@ const categoryIcons = {
 
 interface EntryTableProps {
   entries: LedgerEntry[]
+  selectedEntryId?: string | null
   showAll?: boolean
   hasFilters: boolean
   onViewAll(): void
 }
 
-export function EntryTable({ entries, showAll = false, hasFilters, onViewAll }: EntryTableProps) {
-  const [page, setPage] = useState(1)
+export function EntryTable({
+  entries,
+  selectedEntryId,
+  showAll = false,
+  hasFilters,
+  onViewAll,
+}: EntryTableProps) {
+  const sorted = sortEntries(entries)
+  const selectedIndex = sorted.findIndex((entry) => entry.id === selectedEntryId)
+  const [page, setPage] = useState(() =>
+    selectedIndex < 0 ? 1 : Math.floor(selectedIndex / PAGE_SIZE) + 1,
+  )
+  const selectedRow = useRef<HTMLTableRowElement>(null)
+  useEffect(() => {
+    selectedRow.current?.scrollIntoView({ block: 'nearest' })
+  }, [selectedEntryId])
   const pages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE))
   const currentPage = showAll ? Math.min(page, pages) : 1
-  const displayed = sortEntries(entries).slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  )
+  const displayed = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   return (
     <Card className="gap-4 overflow-hidden">
       <CardHeader className="items-center">
-        <CardTitle className="text-lg">{showAll ? '账目明细' : '最近记录'}</CardTitle>
+        <CardTitle className="text-lg">{showAll ? '全部账目' : '最近记录'}</CardTitle>
         <CardAction>
           {showAll ? (
             <Badge variant="secondary" className="text-sm">
@@ -102,7 +114,12 @@ export function EntryTable({ entries, showAll = false, hasFilters, onViewAll }: 
                 const Icon =
                   categoryIcons[entry.category as keyof typeof categoryIcons] ?? CircleEllipsis
                 return (
-                  <TableRow key={entry.id}>
+                  <TableRow
+                    key={entry.id}
+                    ref={entry.id === selectedEntryId ? selectedRow : undefined}
+                    data-state={entry.id === selectedEntryId ? 'selected' : undefined}
+                    aria-selected={entry.id === selectedEntryId}
+                  >
                     <TableCell className="py-3 pl-6">
                       <div className="flex items-center gap-3">
                         <Badge

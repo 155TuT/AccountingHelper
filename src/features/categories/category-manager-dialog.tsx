@@ -26,10 +26,12 @@ export function CategoryManagerDialog({
   categories,
   actions,
   disabled,
+  onOpenChange,
 }: {
   categories: CategoryCatalog
   disabled?: boolean
   actions: CategoryActions
+  onOpenChange?(open: boolean): void
 }) {
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<EntryType>('expense')
@@ -99,6 +101,7 @@ export function CategoryManagerDialog({
       open={open}
       onOpenChange={(next) => {
         setOpen(next)
+        onOpenChange?.(next)
         if (!next) {
           setName('')
           clearTransient()
@@ -120,7 +123,7 @@ export function CategoryManagerDialog({
       <DialogContent className="max-h-[85svh] sm:max-w-xl" showCloseButton>
         <DialogHeader>
           <DialogTitle>管理类别</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="sr-only">
             类别保存在当前浏览器。重命名或删除不会修改历史账目。
           </DialogDescription>
         </DialogHeader>

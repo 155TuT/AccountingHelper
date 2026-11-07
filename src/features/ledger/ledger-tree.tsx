@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useEffect, useState, type ReactNode } from 'react'
 import { ChevronRight, Copy, FilePlus2, FileText, FolderOpen, Save, X } from 'lucide-react'
 import { formatCurrency } from '@/domain/ledger/money'
@@ -22,16 +24,24 @@ function TreeAction({
   children: ReactNode
 }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      disabled={disabled}
-      onClick={onClick}
-      className="flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-3.5"
-    >
-      {children}
-    </button>
+    <Tooltip delayDuration={200}>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          type="button"
+          size="icon-xs"
+          aria-label={label}
+          disabled={disabled}
+          onClick={onClick}
+          className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-3.5"
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -64,7 +74,7 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1">
       <div className="group/header flex h-9 shrink-0 items-center justify-between px-3">
-        <span className="text-xs font-medium tracking-wide text-muted-foreground">工作区</span>
+        <span className="text-sm font-medium text-sidebar-foreground">工作区</span>
         <div className="flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover/header:opacity-100">
           <TreeAction
             label="打开账本"
@@ -94,8 +104,10 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                   data-selected={isSelected ? 'true' : undefined}
                   className="group/row relative flex items-center gap-0.5 rounded-md pr-1 hover:bg-sidebar-accent data-[selected=true]:bg-sidebar-accent"
                 >
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
+                    size="icon-xs"
                     aria-label={isExpanded ? '折叠账本' : '展开账本'}
                     aria-expanded={isExpanded}
                     onClick={() => toggle(item.id)}
@@ -104,13 +116,14 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                     <ChevronRight
                       className={cn('size-4 transition-transform', isExpanded && 'rotate-90')}
                     />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
                     type="button"
                     aria-current={isSelected ? 'true' : undefined}
                     disabled={ledger.isBusy}
                     onClick={() => selectLedger(item.id)}
-                    className="group-hover/row:pr-20 group-focus-within/row:pr-20 flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left text-sm text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+                    className="group-hover/row:pr-20 group-focus-within/row:pr-20 justify-start py-0 font-normal flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left text-sm text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
                   >
                     <FileText className="size-4 shrink-0 text-muted-foreground" />
                     <span className="min-w-0 flex-1 truncate">{item.name}</span>
@@ -123,7 +136,7 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                     <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                       {item.entries.length}
                     </span>
-                  </button>
+                  </Button>
                   <div className="pointer-events-none absolute right-1 flex items-center gap-0.5 rounded bg-sidebar-accent opacity-0 transition-opacity focus-within:pointer-events-auto focus-within:opacity-100 group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
                     <TreeAction
                       label="保存账本"
@@ -154,17 +167,19 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                       sorted.map((entry, index) => (
                         <li key={entry.id}>
                           {(index === 0 || sorted[index - 1]!.date !== entry.date) && (
-                            <button
+                            <Button
+                              variant="ghost"
                               type="button"
                               disabled={ledger.isBusy}
                               onClick={() => onSelectDate(item.id, entry.date)}
-                              className="w-full rounded px-2 pt-2 pb-1 text-left text-xs text-muted-foreground hover:bg-sidebar-accent"
+                              className="h-auto justify-start font-normal w-full rounded-md px-2 pt-2 pb-1 text-left text-xs text-muted-foreground hover:bg-sidebar-accent"
                               aria-label={`查看 ${item.name} ${entry.date} 的账目`}
                             >
                               {entry.date}
-                            </button>
+                            </Button>
                           )}
-                          <button
+                          <Button
+                            variant="ghost"
                             type="button"
                             aria-current={
                               isSelected && entry.id === ledger.selectedEntryId ? 'true' : undefined
@@ -174,7 +189,7 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                             }
                             disabled={ledger.isBusy}
                             onClick={() => ledger.selectEntry(item.id, entry.id)}
-                            className="flex h-7 w-full items-center gap-2 rounded-md px-2 text-left text-sm text-sidebar-foreground hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[selected=true]:bg-sidebar-accent data-[selected=true]:text-sidebar-accent-foreground"
+                            className="justify-start py-0 font-normal flex h-7 w-full items-center gap-2 rounded-md px-2 text-left text-sm text-sidebar-foreground hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[selected=true]:bg-sidebar-accent data-[selected=true]:text-sidebar-accent-foreground"
                           >
                             <span className="min-w-0 flex-1 truncate">{entry.category}</span>
                             <span
@@ -186,7 +201,7 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                               {entry.type === 'income' ? '+' : '−'}
                               {formatCurrency(entry.amountCents, entry.currency)}
                             </span>
-                          </button>
+                          </Button>
                         </li>
                       ))
                     ) : (

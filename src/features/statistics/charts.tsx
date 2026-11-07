@@ -1,13 +1,6 @@
 import { ChartBar, ChartColumn, ChartLine, ChartPie } from 'lucide-react'
 import { Bar, CartesianGrid, ComposedChart, Line, Pie, PieChart, XAxis, YAxis } from 'recharts'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ChartContainer,
   ChartLegend,
@@ -57,7 +50,6 @@ export function TrendChart({
           <CardTitle role="heading" aria-level={2} className="text-lg">
             收支走势
           </CardTitle>
-          <CardDescription>按有账目的日期汇总（{currency}）</CardDescription>
           <CardAction className="self-center">
             <TabsList aria-label="收支走势图表样式">
               {trendStyles.map(({ value, label, Icon }) => (

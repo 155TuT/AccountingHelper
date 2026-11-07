@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { CalendarDays } from 'lucide-react'
 import { zhCN } from 'react-day-picker/locale'
 import { Button } from '@/components/ui/button'
@@ -14,14 +13,30 @@ interface DatePickerProps {
   onChange(value: string): void
   disabled?: boolean
   optional?: boolean
+  className?: string
+  open: boolean
+  onOpenChange(open: boolean): void
+  side?: 'bottom' | 'left'
+  align?: 'start' | 'end'
 }
 
-export function DatePicker({ id, label, value, onChange, disabled, optional }: DatePickerProps) {
-  const [open, setOpen] = useState(false)
+export function DatePicker({
+  id,
+  label,
+  value,
+  onChange,
+  disabled,
+  optional,
+  className,
+  open,
+  onOpenChange,
+  side = 'bottom',
+  align = 'start',
+}: DatePickerProps) {
   const selected = value ? new Date(`${value}T12:00:00`) : undefined
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={onOpenChange} modal={false}>
       <PopoverTrigger asChild>
         <Button
           id={id}
@@ -30,17 +45,26 @@ export function DatePicker({ id, label, value, onChange, disabled, optional }: D
           disabled={disabled}
           aria-label={label}
           className={cn(
-            'h-10 w-full justify-between font-normal',
+            'h-10 w-full justify-between rounded-lg border-input bg-transparent font-normal shadow-xs data-[state=open]:border-ring data-[state=open]:bg-accent dark:bg-input/30',
             !value && 'text-muted-foreground',
+            className,
           )}
         >
           {value || '不限日期'}
           <CalendarDays className="size-4 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent
+        className="w-auto overflow-hidden rounded-xl p-0"
+        side={side}
+        align={align}
+        sideOffset={side === 'left' ? 16 : 8}
+        collisionPadding={16}
+        aria-label={`${label}选择`}
+      >
         <Calendar
           mode="single"
+          required
           selected={selected}
           defaultMonth={selected}
           locale={zhCN}
@@ -48,7 +72,7 @@ export function DatePicker({ id, label, value, onChange, disabled, optional }: D
           onSelect={(date) => {
             if (date) {
               onChange(localDate(date))
-              setOpen(false)
+              onOpenChange(false)
             }
           }}
         />
@@ -60,7 +84,7 @@ export function DatePicker({ id, label, value, onChange, disabled, optional }: D
               className="w-full"
               onClick={() => {
                 onChange('')
-                setOpen(false)
+                onOpenChange(false)
               }}
             >
               清除日期

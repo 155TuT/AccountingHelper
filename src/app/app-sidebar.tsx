@@ -25,7 +25,7 @@ interface AppSidebarProps {
 export function AppSidebar({ ledger, theme, toggleTheme, onSelectDate }: AppSidebarProps) {
   return (
     <Sidebar collapsible="none" className="sticky top-0 h-svh shrink-0 border-r">
-      <SidebarHeader className="h-22 justify-center px-5">
+      <SidebarHeader className="h-(--toolbar-height) justify-center px-5">
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-2.5 px-1">

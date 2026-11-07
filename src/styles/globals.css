@@ -42,6 +42,9 @@
   --sidebar-border: #dfe2ef;
   --sidebar-ring: #7367cf;
   --radius: 0.75rem;
+  --panel-padding: 0.75rem;
+  --panel-gap: 0.75rem;
+  --toolbar-height: calc(2.25rem + var(--panel-padding) * 2 + 1px);
 }
 
 .dark {

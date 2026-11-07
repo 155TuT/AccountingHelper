@@ -7,13 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CategoryPicker } from '@/features/categories/category-picker'
+import { useExclusivePopup } from '@/hooks/use-exclusive-popup'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { validateFilters } from '@/domain/ledger/selectors'
 import type { LedgerFilters } from '@/domain/ledger/types'
@@ -30,6 +25,7 @@ export function FilterPopover({
   onApply(filters: LedgerFilters): void
 }) {
   const [open, setOpen] = useState(false)
+  const { popupProps, closePopups } = useExclusivePopup<'start' | 'end' | 'category'>()
   const [draft, setDraft] = useState(filters)
   const [error, setError] = useState('')
   const unit = currencyInfo(currency).unit
@@ -71,6 +67,7 @@ export function FilterPopover({
         open={open}
         onOpenChange={(next) => {
           setOpen(next)
+          closePopups()
           if (next) {
             setDraft(filters)
             setError('')
@@ -97,6 +94,7 @@ export function FilterPopover({
                   value={draft.startDate}
                   onChange={(value) => update('startDate', value)}
                   optional
+                  {...popupProps('start')}
                 />
               </Field>
               <Field>
@@ -107,6 +105,7 @@ export function FilterPopover({
                   value={draft.endDate}
                   onChange={(value) => update('endDate', value)}
                   optional
+                  {...popupProps('end')}
                 />
               </Field>
               <Field>
@@ -131,24 +130,14 @@ export function FilterPopover({
               </Field>
               <Field className="col-span-2">
                 <FieldLabel htmlFor="filter-category">类别</FieldLabel>
-                <Select
-                  value={draft.category ? `category:${draft.category}` : 'all'}
-                  onValueChange={(value) =>
-                    update('category', value === 'all' ? '' : value.slice('category:'.length))
-                  }
-                >
-                  <SelectTrigger id="filter-category" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部类别</SelectItem>
-                    {options.map((category) => (
-                      <SelectItem key={category} value={`category:${category}`}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategoryPicker
+                  id="filter-category"
+                  value={draft.category}
+                  categories={options}
+                  onChange={(value) => update('category', value)}
+                  optional
+                  {...popupProps('category')}
+                />
               </Field>
             </FieldGroup>
             {error && <FieldError>{error}</FieldError>}
