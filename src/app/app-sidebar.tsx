@@ -75,6 +75,7 @@ export function AppSidebar({
                 variant="ghost"
                 size="icon"
                 aria-label="打开全局设置"
+                disabled={ledger.isBusy}
                 onClick={onOpenSettings}
               >
                 <Settings className="size-4" />

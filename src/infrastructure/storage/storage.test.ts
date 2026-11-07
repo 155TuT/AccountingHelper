@@ -5,6 +5,8 @@ import {
   openLedgerFile,
   saveLedgerFile,
   fileErrorMessage,
+  pickDefaultDirectory,
+  supportsDirectoryPicker,
   type LedgerFileHandle,
 } from './file-system'
 import { parseJsonl, serializeJsonl } from './jsonl'
@@ -41,6 +43,17 @@ describe('JSONL 格式', () => {
 
 describe('文件保存', () => {
   afterEach(() => vi.unstubAllGlobals())
+
+  it('默认目录只请求读取权限用于保存位置，非安全上下文不提供入口', async () => {
+    const directory = { name: '账本目录' }
+    const showDirectoryPicker = vi.fn(async () => directory)
+    vi.stubGlobal('window', { isSecureContext: true, showDirectoryPicker })
+    expect(supportsDirectoryPicker()).toBe(true)
+    expect(await pickDefaultDirectory()).toBe(directory)
+    expect(showDirectoryPicker).toHaveBeenCalledWith({ mode: 'read' })
+    vi.stubGlobal('window', { isSecureContext: false, showDirectoryPicker })
+    expect(supportsDirectoryPicker()).toBe(false)
+  })
 
   function fakeFile(initial: string, failClose = false) {
     let contents = initial

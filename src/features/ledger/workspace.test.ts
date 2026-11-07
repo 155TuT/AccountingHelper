@@ -61,8 +61,63 @@ describe('多账本与文件提交', () => {
     expect(controller.getSnapshot().defaultDirectory).toBe(directory)
     expect(await controller.add(draft, 'CNY')).toBe(true)
     expect(savePicker).toHaveBeenCalledWith(expect.objectContaining({ startIn: directory }))
+    expect(await controller.saveAs()).toBe(true)
+    expect(savePicker).toHaveBeenLastCalledWith(expect.objectContaining({ startIn: directory }))
     controller.setDefaultDirectory(null)
     expect(controller.getSnapshot().defaultDirectory).toBeNull()
+    expect(await controller.saveAs()).toBe(true)
+    expect(savePicker.mock.calls.at(-1)?.at(0)).not.toHaveProperty('startIn')
+  })
+
+  it('选择目录仅返回设置草稿，提交前不改变默认目录或账本', async () => {
+    const { controller } = setup()
+    const previous = { name: '原目录' }
+    const selected = { name: '新目录' }
+    controller.setDefaultDirectory(previous)
+    const before = controller.getSnapshot().ledgers
+    vi.stubGlobal('window', { showDirectoryPicker: async () => selected })
+    expect(await controller.chooseDefaultDirectory()).toBe(selected)
+    expect(controller.getSnapshot()).toMatchObject({
+      defaultDirectory: previous,
+      isBusy: false,
+      error: null,
+    })
+    expect(controller.getSnapshot().ledgers).toBe(before)
+  })
+
+  it('取消目录选择保留已保存的目录，权限失败交由设置弹层显示', async () => {
+    const { controller } = setup()
+    const previous = { name: '原目录' }
+    controller.setDefaultDirectory(previous)
+    const choose = vi.fn().mockRejectedValue(new DOMException('cancel', 'AbortError'))
+    vi.stubGlobal('window', { showDirectoryPicker: choose })
+    expect(await controller.chooseDefaultDirectory()).toBeNull()
+    choose.mockRejectedValue(new DOMException('denied', 'NotAllowedError'))
+    await expect(controller.chooseDefaultDirectory()).rejects.toThrow('无法访问所选目录')
+    expect(controller.getSnapshot()).toMatchObject({
+      defaultDirectory: previous,
+      isBusy: false,
+      error: null,
+    })
+  })
+
+  it('目录选择与文件写入串行，等待期间不会提交目录', async () => {
+    const { controller, savePicker } = setup()
+    let resolve!: (directory: { name: string }) => void
+    vi.stubGlobal('window', {
+      showDirectoryPicker: () =>
+        new Promise((done) => {
+          resolve = done
+        }),
+    })
+    const choosing = controller.chooseDefaultDirectory()
+    expect(controller.getSnapshot().isBusy).toBe(true)
+    expect(await controller.add(draft, 'CNY')).toBe(false)
+    await expect(controller.chooseDefaultDirectory()).rejects.toThrow('正在处理')
+    expect(savePicker).not.toHaveBeenCalled()
+    resolve({ name: '草稿目录' })
+    await choosing
+    expect(controller.getSnapshot()).toMatchObject({ isBusy: false, defaultDirectory: null })
   })
 
   it('首笔直接保存所选币种，重开和切换展示不会改变原币金额', async () => {

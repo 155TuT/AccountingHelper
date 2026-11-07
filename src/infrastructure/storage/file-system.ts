@@ -32,7 +32,7 @@ interface PickerOptions {
 }
 
 interface DirectoryPickerOptions {
-  mode: 'readwrite'
+  mode: 'read'
 }
 
 interface FilePickerApi {
@@ -65,7 +65,7 @@ export function supportsDirectoryPicker(): boolean {
 export async function pickDefaultDirectory(): Promise<LedgerDirectoryHandle> {
   const pick = pickers().showDirectoryPicker
   if (!pick) throw new Error('请使用桌面版 Chrome 或 Edge 选择默认保存目录。')
-  return pick.call(window, { mode: 'readwrite' })
+  return pick.call(window, { mode: 'read' })
 }
 
 export async function openLedgerFile() {

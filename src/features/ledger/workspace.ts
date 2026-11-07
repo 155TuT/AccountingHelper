@@ -115,15 +115,21 @@ export function createWorkspaceController(
     setDefaultDirectory: (directory: LedgerDirectoryHandle | null) =>
       update({ defaultDirectory: directory }),
     async chooseDefaultDirectory() {
-      if (!storage.pickDirectory) {
-        update({ error: '当前浏览器不支持选择默认保存目录。' })
-        return null
+      if (state.isBusy) throw new Error('账本正在处理，请稍后选择目录。')
+      if (!storage.pickDirectory) throw new Error('当前浏览器不支持选择默认保存目录。')
+      update({ isBusy: true })
+      try {
+        return await storage.pickDirectory()
+      } catch (cause) {
+        if (cause instanceof DOMException) {
+          if (cause.name === 'AbortError') return null
+          if (cause.name === 'NotAllowedError' || cause.name === 'SecurityError')
+            throw new Error('无法访问所选目录，请选择其他目录或重新授权。')
+        }
+        throw cause
+      } finally {
+        update({ isBusy: false })
       }
-      let directory: LedgerDirectoryHandle | null = null
-      const ok = await run(async () => {
-        directory = await storage.pickDirectory!()
-      })
-      return ok ? directory : null
     },
     open: () =>
       run(async () => {

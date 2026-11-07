@@ -27,7 +27,6 @@ import { useCategories } from '@/features/categories/use-categories'
 import { useCurrency } from '@/features/currency/use-currency'
 import { EntryComposer } from '@/features/entries/entry-composer'
 import { EntryTable } from '@/features/entries/entry-table'
-
 import { useLedger } from '@/features/ledger/use-ledger'
 import { SettingsDialog, type SettingsValues } from '@/features/settings/settings-dialog'
 import { ActiveFilters, FilterPopover } from '@/features/statistics/filter-popover'
@@ -292,17 +291,19 @@ export function App() {
         onSubmit={submitEntry}
         submitError={ledger.error}
       />
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        currency={currency}
-        theme={theme}
-        themeColor={themeColor}
-        defaultDirectory={ledger.defaultDirectory}
-        directoryPickerSupported={ledger.directoryPickerSupported}
-        onChooseDirectory={ledger.chooseDefaultDirectory}
-        onSave={saveSettings}
-      />
+      {settingsOpen && (
+        <SettingsDialog
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          currency={currency}
+          theme={theme}
+          themeColor={themeColor}
+          defaultDirectory={ledger.defaultDirectory}
+          directoryPickerSupported={ledger.directoryPickerSupported}
+          onChooseDirectory={ledger.chooseDefaultDirectory}
+          onSave={saveSettings}
+        />
+      )}
       <Toaster theme={theme} position="bottom-right" offset={{ bottom: 96, right: 24 }} />
     </SidebarProvider>
   )
