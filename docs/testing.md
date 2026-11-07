@@ -38,6 +38,8 @@ git diff --check
 
 ## 本版验证记录
 
+以下开发阶段截图保留在 [fb189be 的历史资源目录](https://github.com/155TuT/AccountingHelper/tree/fb189be/docs/assets)。当前目录按[博客配图清单](assets/README.md)整理，保留产品运行与 GitHub 协作图片。
+
 2026-11-07，PR #14–#17 整合验证：
 
 - 本地 Node.js 26.13：75 项自动化测试（10 个文件）通过，七个模块命令分别执行通过。
@@ -48,7 +50,6 @@ git diff --check
 - 批量打开两本包含相同账目 ID 的文件（其中一本无币种字段），选择非当前账本的账目后，账本、金额与明细同步切换；日期入口应用当天筛选。
 - 向美元账本追加 5 元，授权真实写入后磁盘仍保留 USD 1000 和 CNY 500 两条原币记录，人民币汇总为 76.00。
 - 在磁盘修改已打开的测试文件后尝试追加，页面提示重新打开并保留金额草稿，文件未被覆盖。结束后刷新恢复空工作台。
-- 界面证据：[浅色联调](assets/integration-light.jpg)、[深色联调](assets/integration-dark.jpg)。截图数据来自临时验收文件。
 
 本地结果与 GitHub Actions 结果分别记录；Node.js 22.12 / 24 的远端执行结果以对应 Actions 任务为准。磁盘满、close 失败等异常由模拟测试覆盖；Edge 与操作系统权限撤销仍需人工确认。
 
@@ -60,7 +61,6 @@ git diff --check
 - 金额自动聚焦且保持页面滚动位置；零金额提示错误；日期弹层、币种切换和类别管理不丢失金额草稿。
 - 使用卡片左上角保存按钮调用原生文件选择器，取消后保留输入；按 Enter 重试，成功写入临时 JSONL 文件后关闭卡片，顶栏显示已保存。磁盘记录为 `currency: USD`、`amountCents: 1234`。
 - 打开含 11 笔记录的独立验收文件，从文件树选择最早记录，切换到全部账目并定位第二页。验收后刷新恢复空工作台。
-- 界面证据：[浅色浮动卡片](assets/floating-entry-light.jpg)、[深色浮动卡片](assets/floating-entry-dark.jpg)、[工作区按钮提示](assets/workspace-tooltip.jpg)。
 
 2026-11-07，日期、类别与间距微调验证：
 
@@ -69,8 +69,7 @@ git diff --check
 - 筛选中的开始日期与结束日期互斥，清除日期、选择类别和应用后清除筛选均可完成。
 - 浏览器实际计算顶栏 padding、卡片上下 padding、卡片内容左右 padding 均为 12px，顶栏高度为 61px。深浅色检查通过，浏览器未记录错误或警告。
 - 76 项自动化测试、生产构建、格式检查与 `git diff --check` 通过；验收后恢复空工作台。
-- 界面证据：[浅色日期面板](assets/compact-date-light.jpg)、[深色类别面板](assets/compact-category-dark.jpg)。
-- 左上角标识复用 `public/favicon.svg`，使用 Vite 的 `BASE_URL` 生成路径；本地根路径及 `/AccountingHelper/` 生产预览中图片均加载成功，深浅色可见。子路径生产构建和 76 项测试通过。[最终桌面效果](assets/compact-workspace.jpg)。
+- 左上角标识复用 `public/favicon.svg`，使用 Vite 的 `BASE_URL` 生成路径；本地根路径及 `/AccountingHelper/` 生产预览中图片均加载成功，深浅色可见。子路径生产构建和 76 项测试通过。
 
 ## 桌面验收
 
