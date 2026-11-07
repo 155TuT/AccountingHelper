@@ -21,6 +21,7 @@ import { CategoryManagerDialog } from '@/features/categories/category-manager-di
 interface EntryFormProps {
   isBusy: boolean
   disabled?: boolean
+  autoFocus?: boolean
   categories: CategoryCatalog
   categoryActions: CategoryActions
   onSubmit(draft: EntryDraft): Promise<boolean>
@@ -29,6 +30,7 @@ interface EntryFormProps {
 export function EntryForm({
   isBusy,
   disabled,
+  autoFocus,
   categories,
   categoryActions,
   onSubmit,
@@ -42,6 +44,7 @@ export function EntryForm({
   })
   const [error, setError] = useState('')
   const amountInput = useRef<HTMLInputElement>(null)
+  useEffect(() => { if (autoFocus) amountInput.current?.focus() }, [autoFocus])
 
   useEffect(() => {
     if (categories[draft.type].includes(draft.category)) return
