@@ -14,20 +14,24 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ALL_CATEGORIES, EMPTY_FILTERS } from '@/domain/ledger/constants'
+import { currencyInfo, type CurrencyCode } from '@/domain/currency/currencies'
 import { validateFilters } from '@/domain/ledger/selectors'
 import type { LedgerFilters } from '@/domain/ledger/types'
 
 export function FilterPopover({
   filters,
+  currency,
   onApply,
 }: {
   filters: LedgerFilters
+  currency: CurrencyCode
   onApply(filters: LedgerFilters): void
 }) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(filters)
   const [error, setError] = useState('')
   const count = Object.values(filters).filter(Boolean).length
+  const unit = currencyInfo(currency).unit
 
   function update(key: keyof LedgerFilters, value: string) {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -100,7 +104,7 @@ export function FilterPopover({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="filter-min">最低金额（元）</FieldLabel>
+                <FieldLabel htmlFor="filter-min">最低金额（{unit}）</FieldLabel>
                 <Input
                   id="filter-min"
                   inputMode="decimal"
@@ -110,7 +114,7 @@ export function FilterPopover({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="filter-max">最高金额（元）</FieldLabel>
+                <FieldLabel htmlFor="filter-max">最高金额（{unit}）</FieldLabel>
                 <Input
                   id="filter-max"
                   inputMode="decimal"
@@ -160,13 +164,20 @@ export function FilterPopover({
   )
 }
 
-export function ActiveFilters({ filters }: { filters: LedgerFilters }) {
+export function ActiveFilters({
+  filters,
+  currency,
+}: {
+  filters: LedgerFilters
+  currency: CurrencyCode
+}) {
+  const symbol = currencyInfo(currency).symbol
   const labels = [
     (filters.startDate || filters.endDate) &&
       `${filters.startDate || '最早'} 至 ${filters.endDate || '至今'}`,
     filters.category,
     (filters.minAmount || filters.maxAmount) &&
-      `¥${filters.minAmount || '0'} — ${filters.maxAmount ? `¥${filters.maxAmount}` : '不限'}`,
+      `${symbol}${filters.minAmount || '0'} — ${filters.maxAmount ? `${symbol}${filters.maxAmount}` : '不限'}`,
   ].filter(Boolean)
   if (!labels.length) return null
   return (

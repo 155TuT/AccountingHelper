@@ -1,3 +1,4 @@
+import { DEFAULT_CURRENCY, isCurrencyCode, type CurrencyCode } from '@/domain/currency/currencies'
 import { CATEGORIES } from './constants'
 import { parseMoney } from './money'
 import type { EntryDraft, LedgerEntry } from './types'
@@ -17,7 +18,7 @@ export function validateEntry(value: unknown): LedgerEntry {
     throw new Error('每行应为一个账目对象。')
   }
   const item = value as Record<string, unknown>
-  const fields = ['id', 'type', 'date', 'amountCents', 'category', 'note', 'createdAt']
+  const fields = ['id', 'type', 'date', 'amountCents', 'category', 'note', 'createdAt', 'currency']
   if (Object.keys(item).some((key) => !fields.includes(key))) {
     throw new Error('账目包含当前版本无法识别的字段。')
   }
@@ -43,10 +44,15 @@ export function validateEntry(value: unknown): LedgerEntry {
   ) {
     throw new Error('录入时间应为带时区的 ISO 8601 时间。')
   }
-  return item as unknown as LedgerEntry
+  const currency = item.currency ?? DEFAULT_CURRENCY
+  if (!isCurrencyCode(currency)) throw new Error('币种应为受支持的币种标识。')
+  return { ...item, currency } as unknown as LedgerEntry
 }
 
-export function createEntry(draft: EntryDraft): LedgerEntry {
+export function createEntry(
+  draft: EntryDraft,
+  currency: CurrencyCode = DEFAULT_CURRENCY,
+): LedgerEntry {
   return validateEntry({
     id: crypto.randomUUID(),
     type: draft.type,
@@ -55,5 +61,6 @@ export function createEntry(draft: EntryDraft): LedgerEntry {
     category: draft.category,
     note: draft.note.trim(),
     createdAt: new Date().toISOString(),
+    currency,
   })
 }

@@ -17,6 +17,7 @@ const entry: LedgerEntry = {
   category: '饮食',
   note: '午餐\n咖啡',
   createdAt: '2026-11-07T14:00:00+08:00',
+  currency: 'CNY',
 }
 
 afterEach(() => vi.unstubAllGlobals())

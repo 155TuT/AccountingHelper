@@ -1,3 +1,5 @@
+import { currencyInfo, DEFAULT_CURRENCY, type CurrencyCode } from '@/domain/currency/currencies'
+
 export function parseMoney(value: string, allowZero = false): number {
   const normalized = value.trim()
   if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) {
@@ -16,6 +18,7 @@ export function formatMoney(cents: number): string {
   return `${cents < 0 ? '-' : ''}${whole}.${String(absolute % 100).padStart(2, '0')}`
 }
 
-export function formatCurrency(cents: number): string {
-  return `${cents < 0 ? '-' : ''}¥${formatMoney(Math.abs(cents))}`
+export function formatCurrency(cents: number, currency: CurrencyCode = DEFAULT_CURRENCY): string {
+  const symbol = currencyInfo(currency).symbol
+  return `${cents < 0 ? '-' : ''}${symbol}${formatMoney(Math.abs(cents))}`
 }

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { DEFAULT_CURRENCY, type CurrencyCode } from '@/domain/currency/currencies'
 import { summarize } from '@/domain/ledger/selectors'
 import type { EntryDraft, LedgerEntry } from '@/domain/ledger/types'
 import { createEntry } from '@/domain/ledger/validation'
@@ -79,9 +80,9 @@ export function useLedger() {
         commit({ ...current.current, session })
         toast.success('账本已保存到文件')
       }),
-    add: (draft: EntryDraft) =>
+    add: (draft: EntryDraft, currency: CurrencyCode = DEFAULT_CURRENCY) =>
       run(async () => {
-        const next = [...current.current.entries, createEntry(draft)]
+        const next = [...current.current.entries, createEntry(draft, currency)]
         summarize(next)
         const session = current.current.session
           ? await saveLedgerFile(current.current.session, next)

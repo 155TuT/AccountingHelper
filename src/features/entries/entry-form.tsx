@@ -15,16 +15,26 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CATEGORIES } from '@/domain/ledger/constants'
+import type { CurrencyCode } from '@/domain/currency/currencies'
 import type { EntryDraft, EntryType } from '@/domain/ledger/types'
 import { createEntry, localDate } from '@/domain/ledger/validation'
+import { CurrencyPicker } from '@/features/currency/currency-picker'
 
 interface EntryFormProps {
   isBusy: boolean
   disabled?: boolean
-  onSubmit(draft: EntryDraft): Promise<boolean>
+  currency: CurrencyCode
+  onCurrencyChange(currency: CurrencyCode): void
+  onSubmit(draft: EntryDraft, currency: CurrencyCode): Promise<boolean>
 }
 
-export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
+export function EntryForm({
+  isBusy,
+  disabled,
+  currency,
+  onCurrencyChange,
+  onSubmit,
+}: EntryFormProps) {
   const [draft, setDraft] = useState<EntryDraft>({
     type: 'expense',
     date: localDate(),
@@ -43,9 +53,9 @@ export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
   async function submit(event: FormEvent) {
     event.preventDefault()
     try {
-      createEntry(draft)
+      createEntry(draft, currency)
       setError('')
-      if (await onSubmit(draft)) {
+      if (await onSubmit(draft, currency)) {
         setDraft((current) => ({ ...current, amount: '', note: '' }))
         amountInput.current?.focus()
       }
@@ -89,7 +99,13 @@ export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
             <Field>
               <FieldLabel htmlFor="entry-amount">金额</FieldLabel>
               <InputGroup className="h-14">
-                <InputGroupAddon className="text-xl">¥</InputGroupAddon>
+                <InputGroupAddon className="pl-2">
+                  <CurrencyPicker
+                    currency={currency}
+                    onChange={onCurrencyChange}
+                    disabled={isBusy}
+                  />
+                </InputGroupAddon>
                 <InputGroupInput
                   ref={amountInput}
                   id="entry-amount"

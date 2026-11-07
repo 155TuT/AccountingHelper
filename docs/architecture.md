@@ -16,13 +16,15 @@ React 状态保存当前账本和筛选条件；用户授权的 JSONL 文件保�
 | ------------------------ | ---------------------------------------- | ------------------------------------------------------- |
 | `app`                    | 页面布局、导航、功能组合                 | `app.tsx`、`app-sidebar.tsx`                            |
 | `components/ui`          | shadcn 基础组件源码                      | Card、Table、Input、Sidebar、Chart 等                   |
+| `domain/currency`        | 币种列表、参考汇率、换算与展示投影       | `currencies.ts`、`projection.ts`                        |
 | `domain/ledger`          | 类型、类别、金额、日期、筛选、排序和统计 | `types.ts`、`validation.ts`、`money.ts`、`selectors.ts` |
 | `infrastructure/storage` | 文件授权、读写、JSONL 校验与序列化       | `file-system.ts`、`jsonl.ts`                            |
 | `features/ledger`        | 当前账本、异步状态、错误反馈             | `use-ledger.ts`                                         |
+| `features/currency`      | 币种入口与当前展示币种状态               | `currency-picker.tsx`、`use-currency.ts`                |
 | `features/entries`       | 记账表单、最近记录与分页表格             | `entry-form.tsx`、`entry-table.tsx`                     |
 | `features/statistics`    | 筛选表单、汇总和图表                     | `filter-popover.tsx`、`summary-cards.tsx`、`charts.tsx` |
 | `features/theme`         | 当前页面的深浅色状态                     | `use-theme.ts`                                          |
-| `styles`                 | 颜色、间距基础与全局主题                 | `globals.css`                                           |
+| `styles`                 | 颜色、间距基础、全局主题与币种主色       | `globals.css`                                           |
 
 依赖由外向内：`app` 组合 `features`；`features` 调用 `domain`、`infrastructure` 和 `components/ui`；`infrastructure` 复用 `domain` 的校验规则。`domain` 只依赖 TypeScript 和标准 JavaScript API，`components/ui` 保持通用。
 
@@ -40,9 +42,13 @@ React 状态保存当前账本和筛选条件；用户授权的 JSONL 文件保�
 
 筛选草稿在弹出面板内编辑，点击“应用筛选”后统一生效。日期和金额区间包含边界，各条件取交集。
 
-总览卡片、收支走势、分类收支图表和表格共用同一份筛选结果。收支分别累加，结余为收入减支出。`categoryBreakdown` 按收支类型汇总分类金额和笔数，分类占比分别以当前筛选下的收入或支出合计为分母。
+总览卡片、两种图表和表格共用同一份筛选结果。收支分别累加，结余为收入减支出。最近记录按记账日期倒序，同日按录入时刻倒序；全部账目每页 10 笔。
 
-收支走势可切换柱状图与折线图，分类收入与分类支出可分别切换环形图与条形图。图表样式只保留在当前组件会话中。最近记录按记账日期倒序，同日按录入时刻倒序；全部账目每页 10 笔。
+## 币种与换算
+
+展示币种保存在页面状态中，由 `features/currency` 的入口切换，同时把 `data-currency` 写到根元素，`styles/globals.css` 中按币种覆盖主色、强调色和焦点色，因此切换币种会同时改变金额符号和全局配色，深浅色各自有一套取值。
+
+账目按记账时的币种和金额进入 `domain/currency/projection.ts`：`projectEntries` 用整数运算按参考汇率把每笔金额折算到当前展示币种，四舍五入到分。筛选、汇总和图表在折算后的账目上计算，保证口径一致；写回 JSONL 时使用上一节保存的原始账目，不写入折算结果。汇率是内置参考值，不联网更新，旧账本缺少币种字段时按人民币补齐。
 
 ## UI 与主题
 
@@ -55,6 +61,7 @@ shadcn 源码的 `cn` 引用统一指向 `lib/utils.ts`，Toaster 的主题由�
 ## 本版取舍
 
 - 账目规模较小，每次保存重写完整 JSONL 文件，优先保证格式和提交过程清楚。
+- 汇率以常量形式内置，换取离线可用与结果可复现；接入实时汇率需新增数据来源与缓存，届时只替换 `domain/currency` 的换算入口。
 - 通过标准浏览器文件选择器管理授权，刷新后由用户重新打开账本。
 - 页面与业务状态使用 React Hook 管理，两种视图直接切换。
 - 默认空工作台可直接录入首笔账目，验收数据作为独立 JSONL 文件放在 `examples/`。

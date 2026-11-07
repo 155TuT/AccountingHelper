@@ -160,8 +160,22 @@ describe('日期与账目校验', () => {
       { ...base, note: null },
       { ...base, createdAt: '2026-11-07T12:00:00' },
       { ...base, createdAt: '2026-02-30T12:00:00+08:00' },
+      { ...base, currency: 'usd' },
+      { ...base, currency: 1 },
     ]
     for (const value of invalid) expect(() => validateEntry(value)).toThrow()
+  })
+
+  it('读取旧账本时补人民币币种，新记录使用当前币种', () => {
+    const legacy = { ...firstEntry } as Partial<LedgerEntry>
+    delete legacy.currency
+    expect(parseJsonl(JSON.stringify(legacy))[0]?.currency).toBe('CNY')
+    expect(() => parseJsonl(JSON.stringify({ ...firstEntry, currency: 'usd' }))).toThrow('币种')
+    const usd = createEntry(
+      { type: 'expense', date: '2026-11-07', amount: '25.50', category: '饮食', note: '' },
+      'USD',
+    )
+    expect(usd).toMatchObject({ currency: 'USD', amountCents: 2550 })
   })
 
   it('新增账目统一换算金额、去除备注首尾空白并生成标识', () => {

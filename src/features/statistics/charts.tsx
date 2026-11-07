@@ -20,6 +20,7 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empt
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/domain/ledger/money'
 import { categoryBreakdown, dailyTotals } from '@/domain/ledger/selectors'
+import type { CurrencyCode } from '@/domain/currency/currencies'
 import type { EntryType, LedgerEntry } from '@/domain/ledger/types'
 import { cn } from '@/lib/utils'
 
@@ -39,9 +40,11 @@ const axisAmount = new Intl.NumberFormat('zh-CN', {
 
 export function TrendChart({
   entries,
+  currency,
   hasFilters,
 }: {
   entries: readonly LedgerEntry[]
+  currency: CurrencyCode
   hasFilters: boolean
 }) {
   const data = dailyTotals(entries)
@@ -54,7 +57,7 @@ export function TrendChart({
           <CardTitle role="heading" aria-level={2} className="text-lg">
             收支走势
           </CardTitle>
-          <CardDescription>按有账目的日期汇总（元）</CardDescription>
+          <CardDescription>按有账目的日期汇总（{currency}）</CardDescription>
           <CardAction className="self-center">
             <TabsList aria-label="收支走势图表样式">
               {trendStyles.map(({ value, label, Icon }) => (
@@ -107,7 +110,7 @@ export function TrendChart({
                             <>
                               <span className="text-muted-foreground">{name}</span>
                               <span className="ml-auto font-medium tabular-nums">
-                                {formatCurrency(Number(amount))}
+                                {formatCurrency(Number(amount), currency)}
                               </span>
                             </>
                           )}
@@ -175,11 +178,13 @@ export function CategoryChart({
   entries,
   type,
   total,
+  currency,
   hasFilters,
 }: {
   entries: readonly LedgerEntry[]
   type: EntryType
   total: number
+  currency: CurrencyCode
   hasFilters: boolean
 }) {
   const typeLabel = type === 'expense' ? '支出' : '收入'
@@ -231,7 +236,7 @@ export function CategoryChart({
                                   <>
                                     <span className="text-muted-foreground">{name}</span>
                                     <span className="ml-auto font-medium tabular-nums">
-                                      {formatCurrency(Number(amount))}
+                                      {formatCurrency(Number(amount), currency)}
                                     </span>
                                   </>
                                 )}
@@ -270,7 +275,7 @@ export function CategoryChart({
                               {item.category}
                             </span>
                             <span className="font-medium tabular-nums">
-                              {formatCurrency(item.amount)}
+                              {formatCurrency(item.amount, currency)}
                             </span>
                           </div>
                           <div className="flex justify-between gap-2 pl-4 text-xs text-muted-foreground tabular-nums">

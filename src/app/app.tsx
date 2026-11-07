@@ -1,5 +1,6 @@
 import { lazy, Suspense, useMemo, useState, type CSSProperties } from 'react'
 import { AlertCircle, Check, FilePlus2, FileText, LoaderCircle, Save, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,8 +8,12 @@ import { CardTitle } from '@/components/ui/card'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Toaster } from '@/components/ui/sonner'
+import { currencyInfo, convertCents, type CurrencyCode } from '@/domain/currency/currencies'
+import { projectEntries } from '@/domain/currency/projection'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
+import { parseMoney } from '@/domain/ledger/money'
 import { filterEntries, summarize } from '@/domain/ledger/selectors'
+import { useCurrency } from '@/features/currency/use-currency'
 import { EntryForm } from '@/features/entries/entry-form'
 import { EntryTable } from '@/features/entries/entry-table'
 import { useLedger } from '@/features/ledger/use-ledger'
@@ -27,12 +32,37 @@ const CategoryChart = lazy(() =>
 export function App() {
   const ledger = useLedger()
   const { theme, toggleTheme } = useTheme()
+  const { currency, setCurrency } = useCurrency()
   const [view, setView] = useState<View>('overview')
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS })
-  const entries = useMemo(() => filterEntries(ledger.entries, filters), [ledger.entries, filters])
+  const displayEntries = useMemo(
+    () => projectEntries(ledger.entries, currency),
+    [ledger.entries, currency],
+  )
+  const entries = useMemo(() => filterEntries(displayEntries, filters), [displayEntries, filters])
   const totals = useMemo(() => summarize(entries), [entries])
   const hasFilters = Object.values(filters).some(Boolean)
   const fileActionsDisabled = ledger.isBusy || !ledger.fileSystemSupported
+
+  function switchCurrency(next: CurrencyCode) {
+    if (next === currency) return
+    const convertAmount = (value: string) => {
+      if (!value.trim()) return value
+      try {
+        const cents = convertCents(parseMoney(value, true), currency, next)
+        return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, '0')}`
+      } catch {
+        return value
+      }
+    }
+    setCurrency(next)
+    setFilters((current) => ({
+      ...current,
+      minAmount: convertAmount(current.minAmount),
+      maxAmount: convertAmount(current.maxAmount),
+    }))
+    toast.info(`已切换为${currencyInfo(next).name}，账目按参考汇率换算展示`)
+  }
 
   async function switchLedger(action: () => Promise<boolean>) {
     if (await action()) {
@@ -94,7 +124,7 @@ export function App() {
             >
               {view === 'overview' ? '收支总览' : '全部账目'}
             </CardTitle>
-            <FilterPopover filters={filters} onApply={setFilters} />
+            <FilterPopover filters={filters} currency={currency} onApply={setFilters} />
           </div>
           {!ledger.fileSystemSupported && (
             <Alert>
@@ -119,12 +149,12 @@ export function App() {
               </Button>
             </Alert>
           )}
-          <ActiveFilters filters={filters} />
-          <SummaryCards totals={totals} />
+          <ActiveFilters filters={filters} currency={currency} />
+          <SummaryCards totals={totals} currency={currency} />
           <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-6">
             {view === 'overview' && (
               <Suspense fallback={<Skeleton className="h-[500px] rounded-xl" />}>
-                <TrendChart entries={entries} hasFilters={hasFilters} />
+                <TrendChart entries={entries} currency={currency} hasFilters={hasFilters} />
               </Suspense>
             )}
             <div className="col-start-2 row-start-1 min-w-0 self-start">
@@ -132,6 +162,8 @@ export function App() {
                 key={ledger.key}
                 isBusy={ledger.isBusy}
                 disabled={!ledger.fileSystemSupported}
+                currency={currency}
+                onCurrencyChange={switchCurrency}
                 onSubmit={ledger.add}
               />
             </div>
@@ -142,12 +174,14 @@ export function App() {
                     entries={entries}
                     type="expense"
                     total={totals.expense}
+                    currency={currency}
                     hasFilters={hasFilters}
                   />
                   <CategoryChart
                     entries={entries}
                     type="income"
                     total={totals.income}
+                    currency={currency}
                     hasFilters={hasFilters}
                   />
                 </Suspense>
