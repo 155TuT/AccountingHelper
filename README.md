@@ -72,7 +72,9 @@ examples/                    # 可打开的 JSONL 验收账本
 | `npm run format`       | 使用 Prettier 统一格式        |
 | `npm run format:check` | 检查格式                      |
 
-生产构建为静态资源，可将 `dist/` 部署到 HTTPS 静态站点。项目采用单页视图切换，部署时使用站点根路径。
+生产构建为静态资源。推送到 `main` 后，`.github/workflows/deploy-pages.yml` 检查代码并将 `dist/` 部署到 [GitHub Pages](https://155TuT.github.io/AccountingHelper/)，也可在 Actions 中手动触发。仓库 `Settings → Pages → Source` 需选择 `GitHub Actions`。
+
+Pages 工作流按仓库名设置资源子路径。本地复现部署构建可运行 `npm run build -- --base=/AccountingHelper/`，再运行 `npm run preview -- --base=/AccountingHelper/`；部署到其他 HTTPS 静态站点时，按站点路径设置 `--base`。
 
 ## 文档
 

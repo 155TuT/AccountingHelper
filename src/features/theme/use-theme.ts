@@ -12,7 +12,10 @@ export function useTheme() {
     document.documentElement.style.colorScheme = theme
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', theme === 'dark' ? '#171b19' : '#f6f7f9')
+      ?.setAttribute(
+        'content',
+        getComputedStyle(document.documentElement).getPropertyValue('--background').trim(),
+      )
   }, [theme])
 
   return { theme, toggleTheme: () => setTheme((value) => (value === 'dark' ? 'light' : 'dark')) }
