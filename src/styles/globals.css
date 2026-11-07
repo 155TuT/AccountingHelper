@@ -4,76 +4,84 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f6f7f9;
-  --foreground: #232a28;
+  color-scheme: light;
+  --ambient-primary: rgb(113 96 215 / 0.09);
+  --ambient-warm: rgb(228 158 109 / 0.08);
+  --card-shadow: 0 3px 14px rgb(34 38 76 / 0.035);
+  --background: #f6f7fc;
+  --foreground: #242638;
   --card: #ffffff;
-  --card-foreground: #232a28;
+  --card-foreground: #242638;
   --popover: #ffffff;
-  --popover-foreground: #232a28;
-  --primary: #35674f;
+  --popover-foreground: #242638;
+  --primary: #4f46b8;
   --primary-foreground: #ffffff;
-  --secondary: #f0f3f2;
-  --secondary-foreground: #414b46;
-  --muted: #f2f4f5;
-  --muted-foreground: #69756d;
-  --accent: #edf3ef;
-  --accent-foreground: #2a5841;
-  --destructive: #bd493f;
-  --border: #e6eae7;
-  --input: #e0e5e2;
-  --ring: #6f9f82;
-  --income: #3b7b59;
-  --expense: #a86343;
-  --chart-1: #60997a;
-  --chart-2: #dba389;
-  --chart-3: #c2b688;
-  --chart-4: #9badc5;
-  --chart-5: #a48cbb;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #68736d;
-  --sidebar-primary: #35674f;
+  --secondary: #eef0f8;
+  --secondary-foreground: #44475e;
+  --muted: #f0f2f8;
+  --muted-foreground: #62677f;
+  --accent: #eeecfc;
+  --accent-foreground: #4941a3;
+  --destructive: #b93842;
+  --border: #dfe2ef;
+  --input: #c5cada;
+  --ring: #7367cf;
+  --income: #247465;
+  --expense: #ad542c;
+  --chart-1: #247465;
+  --chart-2: #c77446;
+  --chart-3: #8b6bc7;
+  --chart-4: #527db4;
+  --chart-5: #b28b32;
+  --sidebar: #fbfbff;
+  --sidebar-foreground: #62677f;
+  --sidebar-primary: #4f46b8;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eaf2ed;
-  --sidebar-accent-foreground: #35674f;
-  --sidebar-border: #e6eae7;
-  --sidebar-ring: #6f9f82;
+  --sidebar-accent: #eeecfc;
+  --sidebar-accent-foreground: #4941a3;
+  --sidebar-border: #dfe2ef;
+  --sidebar-ring: #7367cf;
   --radius: 0.75rem;
 }
 
 .dark {
-  --background: #171b19;
-  --foreground: #e8ede9;
-  --card: #202622;
-  --card-foreground: #e8ede9;
-  --popover: #252d28;
-  --popover-foreground: #e8ede9;
-  --primary: #a1cbb0;
-  --primary-foreground: #1a3323;
-  --secondary: #2b342e;
-  --secondary-foreground: #d8e2db;
-  --muted: #29312c;
-  --muted-foreground: #a0afa4;
-  --accent: #2d3c32;
-  --accent-foreground: #d1e7d8;
-  --destructive: #f18e80;
-  --border: #344038;
-  --input: #3a473e;
-  --ring: #8bb99a;
-  --income: #95c7a6;
-  --expense: #e5ad8d;
-  --chart-1: #85bb98;
-  --chart-2: #d79c7d;
-  --chart-3: #c6b884;
-  --chart-4: #8fa9cb;
-  --chart-5: #bea3cf;
-  --sidebar: #1c211e;
-  --sidebar-foreground: #a0afa4;
-  --sidebar-primary: #a1cbb0;
-  --sidebar-primary-foreground: #1a3323;
-  --sidebar-accent: #2b3c31;
-  --sidebar-accent-foreground: #bddcc7;
-  --sidebar-border: #344038;
-  --sidebar-ring: #8bb99a;
+  color-scheme: dark;
+  --ambient-primary: rgb(129 111 230 / 0.09);
+  --ambient-warm: rgb(228 158 109 / 0.035);
+  --card-shadow: 0 3px 14px rgb(0 0 0 / 0.12);
+  --background: #141622;
+  --foreground: #edf0fa;
+  --card: #1d2030;
+  --card-foreground: #edf0fa;
+  --popover: #25293c;
+  --popover-foreground: #edf0fa;
+  --primary: #b7afff;
+  --primary-foreground: #242044;
+  --secondary: #2b3045;
+  --secondary-foreground: #e0e4f4;
+  --muted: #272c40;
+  --muted-foreground: #afb6d0;
+  --accent: #333052;
+  --accent-foreground: #e0daff;
+  --destructive: #ff929b;
+  --border: #3b425c;
+  --input: #505a77;
+  --ring: #b7afff;
+  --income: #81d4bd;
+  --expense: #ffb58f;
+  --chart-1: #81d4bd;
+  --chart-2: #ffb58f;
+  --chart-3: #bca2f0;
+  --chart-4: #8eb8ef;
+  --chart-5: #e2c473;
+  --sidebar: #191c2a;
+  --sidebar-foreground: #afb6d0;
+  --sidebar-primary: #b7afff;
+  --sidebar-primary-foreground: #242044;
+  --sidebar-accent: #333052;
+  --sidebar-accent-foreground: #e0daff;
+  --sidebar-border: #3b425c;
+  --sidebar-ring: #b7afff;
 }
 
 @theme inline {
@@ -141,8 +149,16 @@
 }
 
 @layer components {
+  [data-slot='sidebar-inset'] {
+    background-image:
+      radial-gradient(ellipse 70% 440px at 0% 0%, var(--ambient-primary), transparent),
+      radial-gradient(ellipse 55% 420px at 100% 100%, var(--ambient-warm), transparent);
+  }
   [data-slot='card'] {
-    box-shadow: 0 2px 3px rgb(20 40 28 / 0.015);
+    box-shadow: var(--card-shadow);
+  }
+  [data-slot='chart'] .recharts-text {
+    fill: var(--muted-foreground);
   }
   [data-slot='field-label'] {
     font-size: 0.9375rem;
