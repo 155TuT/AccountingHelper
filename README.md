@@ -67,7 +67,7 @@ examples/                    # 可打开的 JSONL 验收账本
 | `npm run build`        | TypeScript 检查并生成 `dist/` |
 | `npm run preview`      | 本地预览生产构建              |
 | `npm run typecheck`    | 检查 TypeScript 类型          |
-| `npm test`             | 执行业务规则与存储测试        |
+| `npm test`             | 执行业务规则、验收与存储测试  |
 | `npm run test:watch`   | 开发时持续运行测试            |
 | `npm run format`       | 使用 Prettier 统一格式        |
 | `npm run format:check` | 检查格式                      |
