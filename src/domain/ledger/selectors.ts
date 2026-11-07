@@ -1,6 +1,6 @@
 import { ALL_CATEGORIES } from './constants'
 import { parseMoney } from './money'
-import type { LedgerEntry, LedgerFilters, LedgerTotals } from './types'
+import type { EntryType, LedgerEntry, LedgerFilters, LedgerTotals } from './types'
 import { isValidDate } from './validation'
 
 export function summarize(entries: readonly LedgerEntry[]): LedgerTotals {
@@ -71,14 +71,21 @@ export function dailyTotals(entries: readonly LedgerEntry[]) {
 }
 
 export function categoryTotals(entries: readonly LedgerEntry[]) {
-  return Object.entries(
-    entries
-      .filter((entry) => entry.type === 'expense')
-      .reduce<Record<string, number>>((totals, entry) => {
-        totals[entry.category] = (totals[entry.category] ?? 0) + entry.amountCents
-        return totals
-      }, {}),
-  )
-    .map(([category, amount]) => ({ category, amount }))
-    .sort((a, b) => b.amount - a.amount)
+  return categoryBreakdown(entries, 'expense').map(({ category, amount }) => ({ category, amount }))
+}
+
+export function categoryBreakdown(entries: readonly LedgerEntry[], type: EntryType) {
+  const categories = new Map<string, { category: string; amount: number; count: number }>()
+  for (const entry of entries) {
+    if (entry.type !== type) continue
+    const total = categories.get(entry.category) ?? {
+      category: entry.category,
+      amount: 0,
+      count: 0,
+    }
+    total.amount += entry.amountCents
+    total.count += 1
+    categories.set(entry.category, total)
+  }
+  return [...categories.values()].sort((a, b) => b.amount - a.amount)
 }

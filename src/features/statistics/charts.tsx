@@ -1,194 +1,314 @@
-import { BarChart3, ChartPie } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from 'recharts'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartBar, ChartColumn, ChartLine, ChartPie } from 'lucide-react'
+import { Bar, CartesianGrid, ComposedChart, Line, Pie, PieChart, XAxis, YAxis } from 'recharts'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/domain/ledger/money'
-import { categoryTotals, dailyTotals } from '@/domain/ledger/selectors'
-import type { LedgerEntry } from '@/domain/ledger/types'
+import { categoryBreakdown, dailyTotals } from '@/domain/ledger/selectors'
+import type { EntryType, LedgerEntry } from '@/domain/ledger/types'
+import { cn } from '@/lib/utils'
 
 const trendConfig = {
-  income: { label: '收入', color: 'var(--chart-1)' },
-  expense: { label: '支出', color: 'var(--chart-2)' },
+  income: { label: '收入', color: 'var(--income)' },
+  expense: { label: '支出', color: 'var(--expense)' },
 } satisfies ChartConfig
-const categoryColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)']
+const series = ['income', 'expense'] as const
+const trendStyles = [
+  { value: 'bar', label: '柱状图', Icon: ChartColumn },
+  { value: 'line', label: '折线图', Icon: ChartLine },
+] as const
+const axisAmount = new Intl.NumberFormat('zh-CN', {
+  notation: 'compact',
+  maximumSignificantDigits: 4,
+})
 
-export function TrendChart({ entries }: { entries: LedgerEntry[] }) {
+export function TrendChart({
+  entries,
+  hasFilters,
+}: {
+  entries: readonly LedgerEntry[]
+  hasFilters: boolean
+}) {
   const data = dailyTotals(entries)
+  const spansYears = data[0]?.date.slice(0, 4) !== data.at(-1)?.date.slice(0, 4)
+
   return (
-    <Card className="gap-4">
-      <CardHeader className="items-center">
-        <CardTitle className="text-lg">收支走势</CardTitle>
-        <CardAction className="flex gap-3">
-          <Badge variant="outline" className="gap-2 border-0 text-sm font-normal">
-            <span className="size-2 rounded-full bg-chart-1" />
-            收入
-          </Badge>
-          <Badge variant="outline" className="gap-2 border-0 text-sm font-normal">
-            <span className="size-2 rounded-full bg-chart-2" />
-            支出
-          </Badge>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        {data.length ? (
-          <ChartContainer
-            config={trendConfig}
-            className="h-[225px] w-full"
-            aria-label="按记账日期汇总的收入与支出柱状图"
-          >
-            <BarChart
-              data={data}
-              accessibilityLayer
-              barGap={5}
-              margin={{ top: 15, right: 0, left: -12, bottom: 0 }}
-            >
-              <CartesianGrid vertical={false} strokeDasharray="4 4" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={12}
-                tickFormatter={(value: string) => value.slice(5).replace('-', '/')}
-                minTickGap={26}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={58}
-                tickFormatter={(value: number) =>
-                  value >= 100000 ? `${value / 100000}k` : String(value / 100)
-                }
-              />
-              <ChartTooltip
-                cursor={{ fill: 'var(--muted)' }}
-                content={
-                  <ChartTooltipContent
-                    formatter={(value, name) => (
-                      <>
-                        <span className="text-muted-foreground">
-                          {name === 'income' ? '收入' : '支出'}
-                        </span>
-                        <span className="ml-auto font-medium tabular-nums">
-                          {formatCurrency(Number(value))}
-                        </span>
-                      </>
+    <Card className="min-w-0">
+      <Tabs defaultValue="bar" className="gap-5">
+        <CardHeader className="border-b">
+          <CardTitle role="heading" aria-level={2} className="text-lg">
+            收支走势
+          </CardTitle>
+          <CardDescription>按有账目的日期汇总（元）</CardDescription>
+          <CardAction className="self-center">
+            <TabsList aria-label="收支走势图表样式">
+              {trendStyles.map(({ value, label, Icon }) => (
+                <TabsTrigger key={value} value={value}>
+                  <Icon aria-hidden="true" />
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </CardAction>
+        </CardHeader>
+        {trendStyles.map(({ value, label }) => (
+          <TabsContent key={value} value={value}>
+            <CardContent>
+              {data.length ? (
+                <ChartContainer config={trendConfig} className="h-[386px] w-full">
+                  <ComposedChart
+                    accessibilityLayer
+                    aria-label={`每日收支${label}`}
+                    data={data}
+                    barGap={4}
+                    margin={{ top: 12, right: 12, bottom: 0, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="4 4" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: 'var(--muted-foreground)' }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      padding={{ left: 12, right: 12 }}
+                      minTickGap={18}
+                      tickFormatter={(date: string) =>
+                        (spansYears ? date : date.slice(5)).replaceAll('-', '/')
+                      }
+                    />
+                    <YAxis
+                      tick={{ fill: 'var(--muted-foreground)' }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      width="auto"
+                      allowDecimals={false}
+                      tickFormatter={(cents: number) => axisAmount.format(cents / 100)}
+                    />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(amount, name) => (
+                            <>
+                              <span className="text-muted-foreground">{name}</span>
+                              <span className="ml-auto font-medium tabular-nums">
+                                {formatCurrency(Number(amount))}
+                              </span>
+                            </>
+                          )}
+                        />
+                      }
+                    />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    {series.map((key) =>
+                      value === 'bar' ? (
+                        <Bar
+                          key={key}
+                          dataKey={key}
+                          name={trendConfig[key].label}
+                          fill={`var(--color-${key})`}
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={28}
+                          isAnimationActive={false}
+                        />
+                      ) : (
+                        <Line
+                          key={key}
+                          dataKey={key}
+                          name={trendConfig[key].label}
+                          stroke={`var(--color-${key})`}
+                          strokeWidth={2.5}
+                          strokeDasharray={key === 'expense' ? '5 3' : undefined}
+                          dot={data.length <= 14 ? { r: 3, fill: `var(--color-${key})` } : false}
+                          isAnimationActive={false}
+                        />
+                      ),
                     )}
-                  />
-                }
-              />
-              <Bar
-                dataKey="income"
-                fill="var(--color-income)"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={24}
-              />
-              <Bar
-                dataKey="expense"
-                fill="var(--color-expense)"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={24}
-              />
-            </BarChart>
-          </ChartContainer>
-        ) : (
-          <Empty className="h-[225px]">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <BarChart3 />
-              </EmptyMedia>
-              <EmptyTitle>记录之后，趋势就会出现</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </CardContent>
+                  </ComposedChart>
+                </ChartContainer>
+              ) : (
+                <Empty className="h-[386px]">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartLine />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {hasFilters ? '当前筛选下没有账目' : '记录之后，趋势就会出现'}
+                    </EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </CardContent>
+          </TabsContent>
+        ))}
+      </Tabs>
     </Card>
   )
 }
 
-export function CategoryChart({ entries }: { entries: LedgerEntry[] }) {
-  const data = categoryTotals(entries).map((item, index) => ({
+const categoryColors = {
+  expense: ['var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'],
+  income: ['var(--chart-1)', 'var(--chart-4)', 'var(--chart-5)'],
+}
+const categoryStyles = [
+  { value: 'donut', label: '环形图', Icon: ChartPie },
+  { value: 'bar', label: '条形图', Icon: ChartBar },
+] as const
+const percent = new Intl.NumberFormat('zh-CN', { style: 'percent', maximumFractionDigits: 1 })
+
+export function CategoryChart({
+  entries,
+  type,
+  total,
+  hasFilters,
+}: {
+  entries: readonly LedgerEntry[]
+  type: EntryType
+  total: number
+  hasFilters: boolean
+}) {
+  const typeLabel = type === 'expense' ? '支出' : '收入'
+  const title = `分类${typeLabel}`
+  const colors = categoryColors[type]
+  const data = categoryBreakdown(entries, type).map((item, index) => ({
     ...item,
-    fill: categoryColors[index % categoryColors.length]!,
+    fill: colors[index % colors.length]!,
   }))
-  const config = Object.fromEntries(
-    data.map((item) => [item.category, { label: item.category, color: item.fill }]),
-  ) satisfies ChartConfig
+  const count = data.reduce((sum, item) => sum + item.count, 0)
+
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-lg">分类支出</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {data.length ? (
-          <>
-            <ChartContainer
-              config={config}
-              className="mx-auto h-[165px] w-full"
-              aria-label="支出类别占比"
-            >
-              <PieChart>
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      nameKey="category"
-                      hideLabel
-                      formatter={(value, name) => (
-                        <>
-                          <span className="text-muted-foreground">{name}</span>
-                          <span className="ml-auto font-medium tabular-nums">
-                            {formatCurrency(Number(value))}
-                          </span>
-                        </>
-                      )}
-                    />
-                  }
-                />
-                <Pie
-                  data={data}
-                  dataKey="amount"
-                  nameKey="category"
-                  innerRadius={49}
-                  outerRadius={72}
-                  paddingAngle={4}
-                  cornerRadius={4}
-                  strokeWidth={0}
-                >
-                  {data.map((item) => (
-                    <Cell key={item.category} fill={item.fill} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ChartContainer>
-            <div className="mt-3 grid gap-4">
-              {data.map((item) => (
-                <div key={item.category} className="flex items-center justify-between text-sm">
-                  <Badge variant="outline" className="gap-2.5 border-0 p-0 text-sm font-normal">
-                    <span className="size-2.5 rounded-full" style={{ background: item.fill }} />
-                    {item.category}
-                  </Badge>
-                  <span className="font-medium tabular-nums">{formatCurrency(item.amount)}</span>
-                </div>
+    <Card className="min-w-0">
+      <Tabs defaultValue="donut" className="gap-4">
+        <CardHeader className="items-center">
+          <CardTitle role="heading" aria-level={2} className="text-lg">
+            {title}
+          </CardTitle>
+          <CardAction>
+            <TabsList aria-label={`${title}图表样式`}>
+              {categoryStyles.map(({ value, label, Icon }) => (
+                <TabsTrigger key={value} value={value}>
+                  <Icon aria-hidden="true" />
+                  {label}
+                </TabsTrigger>
               ))}
-            </div>
-          </>
-        ) : (
-          <Empty className="min-h-52 px-0">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ChartPie />
-              </EmptyMedia>
-              <EmptyTitle>还没有支出记录</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </CardContent>
+            </TabsList>
+          </CardAction>
+        </CardHeader>
+        {categoryStyles.map(({ value }) => (
+          <TabsContent key={value} value={value}>
+            <CardContent className="@container">
+              {data.length ? (
+                <div
+                  className={cn(
+                    'grid min-h-52 items-center gap-4',
+                    value === 'donut' && '@min-[340px]:grid-cols-[132px_minmax(0,1fr)]',
+                  )}
+                >
+                  {value === 'donut' && (
+                    <div className="relative mx-auto size-[132px]">
+                      <ChartContainer config={{}} className="size-full">
+                        <PieChart accessibilityLayer aria-label={`${typeLabel}类别占比`}>
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                hideLabel
+                                formatter={(amount, name) => (
+                                  <>
+                                    <span className="text-muted-foreground">{name}</span>
+                                    <span className="ml-auto font-medium tabular-nums">
+                                      {formatCurrency(Number(amount))}
+                                    </span>
+                                  </>
+                                )}
+                              />
+                            }
+                          />
+                          <Pie
+                            data={data}
+                            dataKey="amount"
+                            nameKey="category"
+                            innerRadius="72%"
+                            outerRadius="100%"
+                            stroke="none"
+                            isAnimationActive={false}
+                          />
+                        </PieChart>
+                      </ChartContainer>
+                      <div className="pointer-events-none absolute inset-0 grid place-content-center text-center">
+                        <span className="text-2xl font-semibold tabular-nums">{count}</span>
+                        <span className="text-xs text-muted-foreground">{typeLabel}笔数</span>
+                      </div>
+                    </div>
+                  )}
+                  <ul className="grid divide-y">
+                    {data.map((item) => {
+                      const share = item.amount / total
+                      return (
+                        <li key={item.category} className="grid gap-1.5 py-2.5 text-sm">
+                          <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                            <span className="flex items-center gap-2 font-medium">
+                              <span
+                                aria-hidden="true"
+                                className="size-2 shrink-0 rounded-full"
+                                style={{ backgroundColor: item.fill }}
+                              />
+                              {item.category}
+                            </span>
+                            <span className="font-medium tabular-nums">
+                              {formatCurrency(item.amount)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between gap-2 pl-4 text-xs text-muted-foreground tabular-nums">
+                            <span>{item.count} 笔</span>
+                            <span>{percent.format(share)}</span>
+                          </div>
+                          {value === 'bar' && (
+                            <div
+                              aria-hidden="true"
+                              className="h-2 overflow-hidden rounded-full bg-muted"
+                            >
+                              <div
+                                className="h-full rounded-full"
+                                style={{ width: `${share * 100}%`, backgroundColor: item.fill }}
+                              />
+                            </div>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ) : (
+                <Empty className="min-h-52 px-0">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartPie />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {hasFilters ? `当前筛选下无${typeLabel}记录` : `还没有${typeLabel}记录`}
+                    </EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </CardContent>
+          </TabsContent>
+        ))}
+      </Tabs>
     </Card>
   )
 }
