@@ -70,6 +70,7 @@ git diff --check
 - 浏览器实际计算顶栏 padding、卡片上下 padding、卡片内容左右 padding 均为 12px，顶栏高度为 61px。深浅色检查通过，浏览器未记录错误或警告。
 - 76 项自动化测试、生产构建、格式检查与 `git diff --check` 通过；验收后恢复空工作台。
 - 界面证据：[浅色日期面板](assets/compact-date-light.jpg)、[深色类别面板](assets/compact-category-dark.jpg)。
+- 左上角标识复用 `public/favicon.svg`，使用 Vite 的 `BASE_URL` 生成路径；本地根路径及 `/AccountingHelper/` 生产预览中图片均加载成功，深浅色可见。子路径生产构建和 76 项测试通过。[最终桌面效果](assets/compact-workspace.jpg)。
 
 ## 桌面验收
 

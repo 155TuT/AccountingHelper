@@ -1,5 +1,4 @@
-import { BookOpen, Moon, Sun } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sidebar,
@@ -29,9 +28,13 @@ export function AppSidebar({ ledger, theme, toggleTheme, onSelectDate }: AppSide
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-2.5 px-1">
-              <Badge className="size-9 shrink-0 justify-center rounded-xl p-0">
-                <BookOpen className="size-5!" strokeWidth={1.8} />
-              </Badge>
+              <img
+                src={`${import.meta.env.BASE_URL}favicon.svg`}
+                alt=""
+                width={36}
+                height={36}
+                className="size-9 shrink-0"
+              />
               <span className="text-[17px] font-semibold tracking-tight">AccountingHelper</span>
             </div>
           </SidebarMenuItem>
