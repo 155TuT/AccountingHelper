@@ -13,21 +13,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ALL_CATEGORIES, EMPTY_FILTERS } from '@/domain/ledger/constants'
+import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { validateFilters } from '@/domain/ledger/selectors'
 import type { LedgerFilters } from '@/domain/ledger/types'
 
 export function FilterPopover({
   filters,
+  categories,
   onApply,
 }: {
   filters: LedgerFilters
+  categories: readonly string[]
   onApply(filters: LedgerFilters): void
 }) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(filters)
   const [error, setError] = useState('')
   const count = Object.values(filters).filter(Boolean).length
+  const options =
+    draft.category && !categories.includes(draft.category)
+      ? [draft.category, ...categories]
+      : categories
 
   function update(key: keyof LedgerFilters, value: string) {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -130,7 +136,7 @@ export function FilterPopover({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">全部类别</SelectItem>
-                    {ALL_CATEGORIES.map((category) => (
+                    {options.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>

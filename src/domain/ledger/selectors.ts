@@ -1,4 +1,3 @@
-import { ALL_CATEGORIES } from './constants'
 import { parseMoney } from './money'
 import type { EntryType, LedgerEntry, LedgerFilters, LedgerTotals } from './types'
 import { isValidDate } from './validation'
@@ -24,8 +23,6 @@ export function validateFilters(filters: LedgerFilters): void {
     throw new Error('请选择有效日期。')
   if (filters.startDate && filters.endDate && filters.startDate > filters.endDate)
     throw new Error('开始日期应早于或等于结束日期。')
-  if (filters.category && !ALL_CATEGORIES.includes(filters.category))
-    throw new Error('请选择有效类别。')
   const min = filters.minAmount.trim() ? parseMoney(filters.minAmount, true) : undefined
   const max = filters.maxAmount.trim() ? parseMoney(filters.maxAmount, true) : undefined
   if (min !== undefined && max !== undefined && min > max)

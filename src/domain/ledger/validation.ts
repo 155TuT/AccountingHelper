@@ -1,4 +1,3 @@
-import { CATEGORIES } from './constants'
 import { parseMoney } from './money'
 import type { EntryDraft, LedgerEntry } from './types'
 
@@ -31,8 +30,8 @@ export function validateEntry(value: unknown): LedgerEntry {
   ) {
     throw new Error('金额应为大于 0 的安全整数，单位为分。')
   }
-  if (typeof item.category !== 'string' || !CATEGORIES[item.type].includes(item.category)) {
-    throw new Error('类别与收支类型不匹配。')
+  if (typeof item.category !== 'string' || !item.category.trim()) {
+    throw new Error('类别不能为空。')
   }
   if (typeof item.note !== 'string') throw new Error('备注应为文字，可留空。')
   if (
@@ -52,7 +51,7 @@ export function createEntry(draft: EntryDraft): LedgerEntry {
     type: draft.type,
     date: draft.date,
     amountCents: parseMoney(draft.amount),
-    category: draft.category,
+    category: draft.category.trim(),
     note: draft.note.trim(),
     createdAt: new Date().toISOString(),
   })
