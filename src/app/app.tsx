@@ -121,13 +121,39 @@ export function App() {
           )}
           <ActiveFilters filters={filters} />
           <SummaryCards totals={totals} />
-          <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-6">
-            <div className="grid min-w-0 gap-6">
-              {view === 'overview' && (
-                <Suspense fallback={<Skeleton className="h-[315px] rounded-xl" />}>
-                  <TrendChart entries={entries} />
+          <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-6">
+            {view === 'overview' && (
+              <Suspense fallback={<Skeleton className="h-[500px] rounded-xl" />}>
+                <TrendChart entries={entries} hasFilters={hasFilters} />
+              </Suspense>
+            )}
+            <div className="col-start-2 row-start-1 min-w-0 self-start">
+              <EntryForm
+                key={ledger.key}
+                isBusy={ledger.isBusy}
+                disabled={!ledger.fileSystemSupported}
+                onSubmit={ledger.add}
+              />
+            </div>
+            {view === 'overview' && (
+              <section aria-label="分类分析" className="col-span-2 grid grid-cols-2 gap-6">
+                <Suspense fallback={<Skeleton className="col-span-2 h-[310px] rounded-xl" />}>
+                  <CategoryChart
+                    entries={entries}
+                    type="expense"
+                    total={totals.expense}
+                    hasFilters={hasFilters}
+                  />
+                  <CategoryChart
+                    entries={entries}
+                    type="income"
+                    total={totals.income}
+                    hasFilters={hasFilters}
+                  />
                 </Suspense>
-              )}
+              </section>
+            )}
+            <div className={view === 'overview' ? 'col-span-2 min-w-0' : 'min-w-0 self-start'}>
               <EntryTable
                 key={`${ledger.key}-${view}-${JSON.stringify(filters)}`}
                 entries={entries}
@@ -135,19 +161,6 @@ export function App() {
                 hasFilters={hasFilters}
                 onViewAll={() => setView('entries')}
               />
-            </div>
-            <div className="grid min-w-0 gap-6">
-              <EntryForm
-                key={ledger.key}
-                isBusy={ledger.isBusy}
-                disabled={!ledger.fileSystemSupported}
-                onSubmit={ledger.add}
-              />
-              {view === 'overview' && (
-                <Suspense fallback={<Skeleton className="h-[365px] rounded-xl" />}>
-                  <CategoryChart entries={entries} />
-                </Suspense>
-              )}
             </div>
           </div>
         </div>

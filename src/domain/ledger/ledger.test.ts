@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { EMPTY_FILTERS } from './constants'
 import { formatMoney, parseMoney } from './money'
 import {
+  categoryBreakdown,
   categoryTotals,
   dailyTotals,
   filterEntries,
@@ -92,8 +93,31 @@ describe('账目筛选和统计', () => {
     const days = dailyTotals(entries)
     expect(days.reduce((sum, day) => sum + day.expense, 0)).toBe(2750)
     expect(categoryTotals(entries).reduce((sum, category) => sum + category.amount, 0)).toBe(2750)
+    expect(categoryBreakdown(entries, 'expense')).toEqual([
+      { category: '饮食', amount: 2550, count: 1 },
+      { category: '交通', amount: 200, count: 1 },
+    ])
     expect(() =>
       summarize([{ ...entries[0]!, amountCents: Number.MAX_SAFE_INTEGER }, entries[1]!]),
     ).toThrow()
+  })
+  it('对筛选后的收入按类别累计金额和笔数', () => {
+    const income = entries[2]!
+    const records = [
+      ...entries,
+      { ...income, id: '4', amountCents: 3000 },
+      { ...income, id: '5', amountCents: 9000, category: '生活费' },
+      { ...income, id: '6', amountCents: 400, date: '2026-11-06' },
+    ]
+    const filtered = filterEntries(records, { ...EMPTY_FILTERS, startDate: '2026-11-07' })
+    const categories = categoryBreakdown(filtered, 'income')
+    expect(categories).toEqual([
+      { category: '工资', amount: 13000, count: 2 },
+      { category: '生活费', amount: 9000, count: 1 },
+    ])
+    expect(categories.reduce((sum, { amount }) => sum + amount, 0)).toBe(summarize(filtered).income)
+    expect(
+      categoryBreakdown(filterEntries(records, { ...EMPTY_FILTERS, category: '饮食' }), 'income'),
+    ).toEqual([])
   })
 })
