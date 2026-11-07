@@ -7,8 +7,10 @@ import { CardTitle } from '@/components/ui/card'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Toaster } from '@/components/ui/sonner'
+import { categoryNames } from '@/domain/ledger/categories'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { filterEntries, summarize } from '@/domain/ledger/selectors'
+import { useCategories } from '@/features/categories/use-categories'
 import { EntryForm } from '@/features/entries/entry-form'
 import { EntryTable } from '@/features/entries/entry-table'
 import { useLedger } from '@/features/ledger/use-ledger'
@@ -26,11 +28,16 @@ const CategoryChart = lazy(() =>
 
 export function App() {
   const ledger = useLedger()
+  const categorySession = useCategories()
   const { theme, toggleTheme } = useTheme()
   const [view, setView] = useState<View>('overview')
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS })
   const entries = useMemo(() => filterEntries(ledger.entries, filters), [ledger.entries, filters])
   const totals = useMemo(() => summarize(entries), [entries])
+  const filterCategories = useMemo(
+    () => categoryNames(categorySession.categories, ledger.entries),
+    [categorySession.categories, ledger.entries],
+  )
   const hasFilters = Object.values(filters).some(Boolean)
   const fileActionsDisabled = ledger.isBusy || !ledger.fileSystemSupported
 
@@ -94,7 +101,7 @@ export function App() {
             >
               {view === 'overview' ? '收支总览' : '全部账目'}
             </CardTitle>
-            <FilterPopover filters={filters} onApply={setFilters} />
+            <FilterPopover filters={filters} categories={filterCategories} onApply={setFilters} />
           </div>
           {!ledger.fileSystemSupported && (
             <Alert>
@@ -141,6 +148,8 @@ export function App() {
                 key={ledger.key}
                 isBusy={ledger.isBusy}
                 disabled={!ledger.fileSystemSupported}
+                categories={categorySession.categories}
+                categoryActions={categorySession.actions}
                 onSubmit={ledger.add}
               />
               {view === 'overview' && (

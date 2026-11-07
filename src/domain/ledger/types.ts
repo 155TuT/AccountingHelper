@@ -31,3 +31,11 @@ export interface LedgerTotals {
   expense: number
   balance: number
 }
+
+export type CategoryCatalog = Record<EntryType, string[]>
+
+export interface CategoryActions {
+  add(type: EntryType, name: string): string | null
+  rename(type: EntryType, currentName: string, nextName: string): string | null
+  remove(type: EntryType, name: string): string | null
+}

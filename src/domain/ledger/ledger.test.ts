@@ -10,7 +10,7 @@ import {
   validateFilters,
 } from './selectors'
 import type { LedgerEntry } from './types'
-import { isValidDate } from './validation'
+import { isValidDate, validateEntry } from './validation'
 
 const entries: LedgerEntry[] = [
   {
@@ -56,6 +56,10 @@ describe('金额与日期', () => {
     expect(isValidDate('2026-02-29')).toBe(false)
     expect(isValidDate('2026-13-01')).toBe(false)
   })
+  it('读取账本时接受本地自定义类别，拒绝空类别', () => {
+    expect(validateEntry({ ...entries[0], category: '咖啡' }).category).toBe('咖啡')
+    expect(() => validateEntry({ ...entries[0], category: ' ' })).toThrow('类别')
+  })
 })
 
 describe('账目筛选和统计', () => {
@@ -79,6 +83,7 @@ describe('账目筛选和统计', () => {
     }
     expect(filterEntries(entries, filters).map((item) => item.id)).toEqual(['1'])
     expect(filterEntries(entries, { ...filters, category: '交通' })).toEqual([])
+    expect(filterEntries(entries, { ...EMPTY_FILTERS, category: '自定义类别' })).toEqual([])
     expect(() =>
       validateFilters({ ...EMPTY_FILTERS, startDate: '2026-11-07', endDate: '2026-11-06' }),
     ).toThrow()

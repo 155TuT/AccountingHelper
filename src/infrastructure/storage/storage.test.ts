@@ -33,7 +33,8 @@ describe('JSONL 格式', () => {
     expect(() => parseJsonl(`${JSON.stringify(entry)}\n\n`)).toThrow('第 2 行')
     expect(() => serializeJsonl([entry, entry])).toThrow('重复')
     expect(() => parseJsonl(JSON.stringify({ ...entry, amountCents: 25.5 }))).toThrow('安全整数')
-    expect(() => parseJsonl(JSON.stringify({ ...entry, type: 'income' }))).toThrow('类别')
+    expect(() => parseJsonl(JSON.stringify({ ...entry, category: ' ' }))).toThrow('类别')
+    expect(parseJsonl(JSON.stringify({ ...entry, category: '咖啡' }))[0]?.category).toBe('咖啡')
   })
 })
 

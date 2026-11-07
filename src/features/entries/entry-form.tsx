@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowDownLeft, ArrowUpRight, LoaderCircle, Plus } from 'lucide-react'
 import { DatePicker } from '@/components/date-picker'
 import { Button } from '@/components/ui/button'
@@ -14,26 +14,39 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CATEGORIES } from '@/domain/ledger/constants'
-import type { EntryDraft, EntryType } from '@/domain/ledger/types'
+import type { CategoryActions, CategoryCatalog, EntryDraft, EntryType } from '@/domain/ledger/types'
 import { createEntry, localDate } from '@/domain/ledger/validation'
+import { CategoryManagerDialog } from '@/features/categories/category-manager-dialog'
 
 interface EntryFormProps {
   isBusy: boolean
   disabled?: boolean
+  categories: CategoryCatalog
+  categoryActions: CategoryActions
   onSubmit(draft: EntryDraft): Promise<boolean>
 }
 
-export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
+export function EntryForm({
+  isBusy,
+  disabled,
+  categories,
+  categoryActions,
+  onSubmit,
+}: EntryFormProps) {
   const [draft, setDraft] = useState<EntryDraft>({
     type: 'expense',
     date: localDate(),
     amount: '',
-    category: '饮食',
+    category: categories.expense[0]!,
     note: '',
   })
   const [error, setError] = useState('')
   const amountInput = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (categories[draft.type].includes(draft.category)) return
+    setDraft((current) => ({ ...current, category: categories[current.type][0]! }))
+  }, [categories, draft.category, draft.type])
 
   function update<K extends keyof EntryDraft>(key: K, value: EntryDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -70,7 +83,7 @@ export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
             value={draft.type}
             onValueChange={(type) => {
               const next = type as EntryType
-              setDraft((current) => ({ ...current, type: next, category: CATEGORIES[next][0]! }))
+              setDraft((current) => ({ ...current, type: next, category: categories[next][0]! }))
               setError('')
             }}
           >
@@ -105,7 +118,10 @@ export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
               </InputGroup>
             </Field>
             <Field>
-              <FieldLabel htmlFor="entry-category">类别</FieldLabel>
+              <div className="flex items-center justify-between gap-3">
+                <FieldLabel htmlFor="entry-category">类别</FieldLabel>
+                <CategoryManagerDialog categories={categories} actions={categoryActions} />
+              </div>
               <Select
                 value={draft.category}
                 onValueChange={(value) => update('category', value)}
@@ -115,7 +131,7 @@ export function EntryForm({ isBusy, disabled, onSubmit }: EntryFormProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES[draft.type].map((category) => (
+                  {categories[draft.type].map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
                     </SelectItem>

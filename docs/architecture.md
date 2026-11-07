@@ -7,7 +7,7 @@
 
 AccountingHelper 是一个纯前端单页应用。Vite 提供开发服务并构建静态资源，React 负责桌面 dashboard，TypeScript 约束账目与模块接口。当前支持收支总览、全部账目两个视图。
 
-React 状态保存当前账本和筛选条件；用户授权的 JSONL 文件保存正式账目。每次打开页面进入空工作台，通过选择文件恢复账本。首次直接添加记录时，先选择保存位置再写入文件。
+React 状态保存当前账本和筛选条件；用户授权的 JSONL 文件保存正式账目。每次打开页面进入空工作台，通过选择文件恢复账本。首次直接添加记录时，先选择保存位置再写入文件。本地类别目录单独保存在浏览器 `localStorage`，跨刷新保留，不写入账本文件。
 
 ## 模块职责
 
@@ -15,8 +15,9 @@ React 状态保存当前账本和筛选条件；用户授权的 JSONL 文件保�
 | ------------------------ | ---------------------------------------- | ------------------------------------------------------- |
 | `app`                    | 页面布局、导航、功能组合                 | `app.tsx`、`app-sidebar.tsx`                            |
 | `components/ui`          | shadcn 基础组件源码                      | Card、Table、Input、Sidebar、Chart 等                   |
-| `domain/ledger`          | 类型、类别、金额、日期、筛选、排序和统计 | `types.ts`、`validation.ts`、`money.ts`、`selectors.ts` |
-| `infrastructure/storage` | 文件授权、读写、JSONL 校验与序列化       | `file-system.ts`、`jsonl.ts`                            |
+| `domain/ledger`          | 类型、默认类别、金额、日期、筛选、排序和统计 | `types.ts`、`categories.ts`、`validation.ts`、`money.ts`、`selectors.ts` |
+| `infrastructure/storage` | 文件授权、读写、JSONL 校验与序列化、类别本地存储 | `file-system.ts`、`jsonl.ts`、`category-storage.ts` |
+| `features/categories`    | 本地类别目录、增删改查与管理弹层         | `use-categories.ts`、`category-manager-dialog.tsx`      |
 | `features/ledger`        | 当前账本、异步状态、错误反馈             | `use-ledger.ts`                                         |
 | `features/entries`       | 记账表单、最近记录与分页表格             | `entry-form.tsx`、`entry-table.tsx`                     |
 | `features/statistics`    | 筛选表单、汇总和图表                     | `filter-popover.tsx`、`summary-cards.tsx`、`charts.tsx` |
@@ -34,6 +35,12 @@ React 状态保存当前账本和筛选条件；用户授权的 JSONL 文件保�
 5. 发生错误时保留原账本状态和表单输入，显示原因，允许用户处理后重试。
 
 账本操作使用同一个忙碌标记，写入期间禁用相关操作。文件快照检查用于发现已发生的外部修改，写入流请求独占模式。当前使用场景为单窗口维护一份账本。
+
+## 类别目录
+
+默认类别只用于首次初始化。用户在“管理类别”弹层中按收支类型新增、重命名或删除类别，每次修改都同步写入 `localStorage`。类别名称在全部收支中唯一，每种收支至少保留一个类别。
+
+账目中的类别始终以字符串保存，打开账本时不依赖当前浏览器的类别目录，因此自定义类别账本可跨设备读取。历史账目使用的类别即使已从目录删除，仍会合并到筛选选项；重命名或删除类别不重写历史账目。
 
 ## 筛选与展示
 
