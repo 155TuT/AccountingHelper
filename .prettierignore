@@ -1,0 +1,7 @@
+node_modules
+dist
+package-lock.json
+docs/task-requirement.md
+docs/blog.md
+LICENSE
+*.jsonl

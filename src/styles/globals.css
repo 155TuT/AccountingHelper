@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #f6f7f9;
+  --foreground: #232a28;
+  --card: #ffffff;
+  --card-foreground: #232a28;
+  --popover: #ffffff;
+  --popover-foreground: #232a28;
+  --primary: #35674f;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f3f2;
+  --secondary-foreground: #414b46;
+  --muted: #f2f4f5;
+  --muted-foreground: #69756d;
+  --accent: #edf3ef;
+  --accent-foreground: #2a5841;
+  --destructive: #bd493f;
+  --border: #e6eae7;
+  --input: #e0e5e2;
+  --ring: #6f9f82;
+  --income: #3b7b59;
+  --expense: #a86343;
+  --chart-1: #60997a;
+  --chart-2: #dba389;
+  --chart-3: #c2b688;
+  --chart-4: #9badc5;
+  --chart-5: #a48cbb;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #68736d;
+  --sidebar-primary: #35674f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf2ed;
+  --sidebar-accent-foreground: #35674f;
+  --sidebar-border: #e6eae7;
+  --sidebar-ring: #6f9f82;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: #171b19;
+  --foreground: #e8ede9;
+  --card: #202622;
+  --card-foreground: #e8ede9;
+  --popover: #252d28;
+  --popover-foreground: #e8ede9;
+  --primary: #a1cbb0;
+  --primary-foreground: #1a3323;
+  --secondary: #2b342e;
+  --secondary-foreground: #d8e2db;
+  --muted: #29312c;
+  --muted-foreground: #a0afa4;
+  --accent: #2d3c32;
+  --accent-foreground: #d1e7d8;
+  --destructive: #f18e80;
+  --border: #344038;
+  --input: #3a473e;
+  --ring: #8bb99a;
+  --income: #95c7a6;
+  --expense: #e5ad8d;
+  --chart-1: #85bb98;
+  --chart-2: #d79c7d;
+  --chart-3: #c6b884;
+  --chart-4: #8fa9cb;
+  --chart-5: #bea3cf;
+  --sidebar: #1c211e;
+  --sidebar-foreground: #a0afa4;
+  --sidebar-primary: #a1cbb0;
+  --sidebar-primary-foreground: #1a3323;
+  --sidebar-accent: #2b3c31;
+  --sidebar-accent-foreground: #bddcc7;
+  --sidebar-border: #344038;
+  --sidebar-ring: #8bb99a;
+}
+
+@theme inline {
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply m-0 min-w-[1200px] bg-background font-sans text-foreground antialiased;
+  }
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  ::selection {
+    background: var(--sidebar-accent);
+    color: var(--sidebar-accent-foreground);
+  }
+}
+
+@layer components {
+  [data-slot='card'] {
+    box-shadow: 0 2px 3px rgb(20 40 28 / 0.015);
+  }
+  [data-slot='field-label'] {
+    font-size: 0.9375rem;
+  }
+  [data-slot='sidebar-menu-button'][data-active='true'] {
+    font-weight: 600;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

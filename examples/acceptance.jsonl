@@ -1,0 +1,3 @@
+{"id":"acceptance-1","type":"expense","date":"2026-11-06","amountCents":2550,"category":"饮食","note":"午餐","createdAt":"2026-11-06T12:00:00+08:00"}
+{"id":"acceptance-2","type":"expense","date":"2026-11-07","amountCents":200,"category":"交通","note":"地铁","createdAt":"2026-11-07T08:00:00+08:00"}
+{"id":"acceptance-3","type":"income","date":"2026-11-07","amountCents":10000,"category":"工资","note":"工资收入","createdAt":"2026-11-07T09:00:00+08:00"}
