@@ -5,9 +5,11 @@ import {
   createLedgerFile,
   fileErrorMessage,
   openLedgerFiles,
+  pickDefaultDirectory,
   sameFile,
   saveLedgerFile,
   type FileSession,
+  type LedgerDirectoryHandle,
   type LedgerFileHandle,
 } from '@/infrastructure/storage/file-system'
 
@@ -21,6 +23,7 @@ export interface WorkspaceState {
   ledgers: LedgerWorkspace[]
   selectedLedgerId: string
   selectedEntryId: string | null
+  defaultDirectory: LedgerDirectoryHandle | null
   isBusy: boolean
   error: string | null
 }
@@ -28,6 +31,7 @@ interface Storage {
   open: typeof openLedgerFiles
   create: typeof createLedgerFile
   save: typeof saveLedgerFile
+  pickDirectory?: typeof pickDefaultDirectory
 }
 function emptyLedger(): LedgerWorkspace {
   return { id: crypto.randomUUID(), name: '未命名账本', session: null, entries: [] }
@@ -35,7 +39,12 @@ function emptyLedger(): LedgerWorkspace {
 
 // Async operations capture one target ledger and publish only after the file closes.
 export function createWorkspaceController(
-  storage: Storage = { open: openLedgerFiles, create: createLedgerFile, save: saveLedgerFile },
+  storage: Storage = {
+    open: openLedgerFiles,
+    create: createLedgerFile,
+    save: saveLedgerFile,
+    pickDirectory: pickDefaultDirectory,
+  },
   notify: (message: string) => void = () => {},
 ) {
   const initial = emptyLedger()
@@ -43,6 +52,7 @@ export function createWorkspaceController(
     ledgers: [initial],
     selectedLedgerId: initial.id,
     selectedEntryId: null,
+    defaultDirectory: null,
     isBusy: false,
     error: null,
   }
@@ -82,7 +92,11 @@ export function createWorkspaceController(
     const session =
       ledger.session && !saveAs
         ? await storage.save(ledger.session, entries)
-        : await storage.create(entries, (handle) => checkTarget(ledger, handle))
+        : await storage.create(
+            entries,
+            (handle) => checkTarget(ledger, handle),
+            state.defaultDirectory,
+          )
     update({
       ledgers: state.ledgers.map((item) =>
         item.id === ledger.id ? { ...ledger, entries, session, name: session.handle.name } : item,
@@ -98,6 +112,19 @@ export function createWorkspaceController(
       }
     },
     clearError: () => update({ error: null }),
+    setDefaultDirectory: (directory: LedgerDirectoryHandle | null) =>
+      update({ defaultDirectory: directory }),
+    async chooseDefaultDirectory() {
+      if (!storage.pickDirectory) {
+        update({ error: '当前浏览器不支持选择默认保存目录。' })
+        return null
+      }
+      let directory: LedgerDirectoryHandle | null = null
+      const ok = await run(async () => {
+        directory = await storage.pickDirectory!()
+      })
+      return ok ? directory : null
+    },
     open: () =>
       run(async () => {
         const opened = await storage.open()

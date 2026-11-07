@@ -87,6 +87,146 @@
   --sidebar-ring: #b7afff;
 }
 
+/* 全局主题色：与币种解耦，主色、强调色和焦点色随设置切换 */
+[data-theme-color='teal'] {
+  --ambient-primary: rgb(15 118 110 / 0.09);
+  --primary: #0f766e;
+  --primary-foreground: #ffffff;
+  --accent: #e3f3ef;
+  --accent-foreground: #0a5a53;
+  --ring: #14b8a6;
+  --sidebar-primary: #0f766e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3f3ef;
+  --sidebar-accent-foreground: #0a5a53;
+  --sidebar-ring: #14b8a6;
+}
+
+.dark[data-theme-color='teal'] {
+  --ambient-primary: rgb(94 234 212 / 0.08);
+  --primary: #5eead4;
+  --primary-foreground: #04322c;
+  --accent: #143d38;
+  --accent-foreground: #b6f4ea;
+  --ring: #2dd4bf;
+  --sidebar-primary: #5eead4;
+  --sidebar-primary-foreground: #04322c;
+  --sidebar-accent: #143d38;
+  --sidebar-accent-foreground: #b6f4ea;
+  --sidebar-ring: #2dd4bf;
+}
+
+[data-theme-color='blue'] {
+  --ambient-primary: rgb(29 95 168 / 0.1);
+  --primary: #1d5fa8;
+  --primary-foreground: #ffffff;
+  --accent: #e7eff9;
+  --accent-foreground: #16467d;
+  --ring: #3b82f6;
+  --sidebar-primary: #1d5fa8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e7eff9;
+  --sidebar-accent-foreground: #16467d;
+  --sidebar-ring: #3b82f6;
+}
+
+.dark[data-theme-color='blue'] {
+  --ambient-primary: rgb(147 186 247 / 0.08);
+  --primary: #93baf7;
+  --primary-foreground: #0a2747;
+  --accent: #17324f;
+  --accent-foreground: #cfe0fb;
+  --ring: #60a5fa;
+  --sidebar-primary: #93baf7;
+  --sidebar-primary-foreground: #0a2747;
+  --sidebar-accent: #17324f;
+  --sidebar-accent-foreground: #cfe0fb;
+  --sidebar-ring: #60a5fa;
+}
+
+[data-theme-color='rose'] {
+  --ambient-primary: rgb(176 53 70 / 0.09);
+  --primary: #b03546;
+  --primary-foreground: #ffffff;
+  --accent: #fbe9ea;
+  --accent-foreground: #8c2029;
+  --ring: #e11d48;
+  --sidebar-primary: #b03546;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fbe9ea;
+  --sidebar-accent-foreground: #8c2029;
+  --sidebar-ring: #e11d48;
+}
+
+.dark[data-theme-color='rose'] {
+  --ambient-primary: rgb(255 154 166 / 0.08);
+  --primary: #ff9aa6;
+  --primary-foreground: #3a0d14;
+  --accent: #42222a;
+  --accent-foreground: #ffd5db;
+  --ring: #fb7185;
+  --sidebar-primary: #ff9aa6;
+  --sidebar-primary-foreground: #3a0d14;
+  --sidebar-accent: #42222a;
+  --sidebar-accent-foreground: #ffd5db;
+  --sidebar-ring: #fb7185;
+}
+
+[data-theme-color='amber'] {
+  --ambient-primary: rgb(161 98 7 / 0.09);
+  --primary: #a16207;
+  --primary-foreground: #ffffff;
+  --accent: #fbf1dd;
+  --accent-foreground: #7a4a06;
+  --ring: #d97706;
+  --sidebar-primary: #a16207;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fbf1dd;
+  --sidebar-accent-foreground: #7a4a06;
+  --sidebar-ring: #d97706;
+}
+
+.dark[data-theme-color='amber'] {
+  --ambient-primary: rgb(252 211 77 / 0.08);
+  --primary: #fcd34d;
+  --primary-foreground: #3b2a05;
+  --accent: #3d331a;
+  --accent-foreground: #fdecc0;
+  --ring: #fbbf24;
+  --sidebar-primary: #fcd34d;
+  --sidebar-primary-foreground: #3b2a05;
+  --sidebar-accent: #3d331a;
+  --sidebar-accent-foreground: #fdecc0;
+  --sidebar-ring: #fbbf24;
+}
+
+[data-theme-color='green'] {
+  --ambient-primary: rgb(47 107 64 / 0.09);
+  --primary: #2f6b40;
+  --primary-foreground: #ffffff;
+  --accent: #e8f4ea;
+  --accent-foreground: #235230;
+  --ring: #16a34a;
+  --sidebar-primary: #2f6b40;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8f4ea;
+  --sidebar-accent-foreground: #235230;
+  --sidebar-ring: #16a34a;
+}
+
+.dark[data-theme-color='green'] {
+  --ambient-primary: rgb(134 217 155 / 0.08);
+  --primary: #86d99b;
+  --primary-foreground: #06280f;
+  --accent: #1b3a25;
+  --accent-foreground: #c6f2d2;
+  --ring: #4ade80;
+  --sidebar-primary: #86d99b;
+  --sidebar-primary-foreground: #06280f;
+  --sidebar-accent: #1b3a25;
+  --sidebar-accent-foreground: #c6f2d2;
+  --sidebar-ring: #4ade80;
+}
 @theme inline {
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
