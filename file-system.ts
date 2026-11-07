@@ -56,6 +56,40 @@ export async function openLedgerFile() {
   return { entries: parseJsonl(snapshot), session: { handle, snapshot } }
 }
 
+/*一次打开多个账本文件*/
+export async function openLedgerFiles() {
+  const open = pickers().showOpenFilePicker
+
+  if (!open) {
+    throw new Error('请使用桌面版 Chrome 或 Edge 打开账本。')
+  }
+
+  const handles = await open.call(window, {
+    ...pickerOptions,
+    multiple: true,
+  })
+
+  if (!handles.length) {
+    throw new DOMException('操作已取消', 'AbortError')
+  }
+
+  const results = await Promise.all(
+    handles.map(async (handle) => {
+      const snapshot = await (await handle.getFile()).text()
+
+      return {
+        entries: parseJsonl(snapshot),
+        session: {
+          handle,
+          snapshot,
+        },
+      }
+    }),
+  )
+
+  return results
+}
+
 async function writeFile(handle: LedgerFileHandle, content: string): Promise<void> {
   const stream = await handle.createWritable({ mode: 'exclusive' })
   try {
