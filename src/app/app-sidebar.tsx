@@ -18,6 +18,7 @@ interface AppSidebarProps {
   ledger: LedgerApi
   theme: Theme
   onSelectDate(id: string, date: string): void
+  onNewEntry(id: string): void
   toggleTheme(): void
   onOpenSettings(): void
 }
@@ -28,6 +29,7 @@ export function AppSidebar({
   toggleTheme,
   onOpenSettings,
   onSelectDate,
+  onNewEntry,
 }: AppSidebarProps) {
   return (
     <Sidebar collapsible="none" className="sticky top-0 h-svh shrink-0 border-r">
@@ -49,7 +51,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent className="px-1">
         <SidebarGroup className="h-full p-1">
-          <LedgerTree ledger={ledger} onSelectDate={onSelectDate} />
+          <LedgerTree ledger={ledger} onSelectDate={onSelectDate} onNewEntry={onNewEntry} />
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border px-3 py-2">

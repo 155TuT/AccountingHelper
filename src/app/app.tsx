@@ -4,9 +4,11 @@ import {
   Check,
   Copy,
   FileText,
+  FolderOpen,
   LayoutDashboard,
   ListOrdered,
   LoaderCircle,
+  Save,
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -130,7 +132,13 @@ export function App() {
     if (ok) setAddOpen(false)
     return ok
   }
+  function changeEntryOpen(open: boolean, ledgerId?: string) {
+    if (ledger.isBusy || (open && !ledger.fileSystemSupported)) return
+    if (open && ledgerId && ledgerId !== selected.id) navigation.selectLedger(ledgerId)
+    setAddOpen(open)
+  }
   const saveState = ledger.isBusy ? 'busy' : selected.session ? 'saved' : 'unsaved'
+  const fileActionsDisabled = ledger.isBusy || !ledger.fileSystemSupported
 
   return (
     <SidebarProvider style={{ '--sidebar-width': '248px' } as CSSProperties}>
@@ -139,6 +147,7 @@ export function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         onOpenSettings={() => setSettingsOpen(true)}
+        onNewEntry={(id) => changeEntryOpen(true, id)}
         onSelectDate={(id, date) => {
           if (ledger.isBusy) return
           ledger.selectLedger(id)
@@ -166,11 +175,36 @@ export function App() {
               {saveState === 'busy' ? '正在处理' : saveState === 'saved' ? '已保存' : '未保存'}
             </Badge>
           </div>
-          <div className="flex shrink-0 items-center justify-end gap-2">
+          <div
+            role="group"
+            aria-label="文件操作"
+            className="flex shrink-0 items-center justify-end gap-2"
+          >
             <Button
+              type="button"
               variant="outline"
               size="sm"
-              disabled={ledger.isBusy || !ledger.fileSystemSupported}
+              disabled={fileActionsDisabled}
+              onClick={() => void navigation.open()}
+            >
+              <FolderOpen />
+              打开
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={fileActionsDisabled}
+              onClick={() => void ledger.save()}
+            >
+              <Save />
+              保存
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={fileActionsDisabled}
               onClick={() => void ledger.saveAs()}
             >
               <Copy />
@@ -281,7 +315,7 @@ export function App() {
       <EntryComposer
         key={selected.id}
         open={addOpen}
-        onOpenChange={setAddOpen}
+        onOpenChange={changeEntryOpen}
         isBusy={ledger.isBusy}
         disabled={!ledger.fileSystemSupported}
         categories={categories}

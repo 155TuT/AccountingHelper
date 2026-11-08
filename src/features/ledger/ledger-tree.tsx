@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useEffect, useState, type ReactNode } from 'react'
-import { ChevronRight, Copy, FilePlus2, FileText, FolderOpen, Save, X } from 'lucide-react'
+import { ChevronRight, FilePlus2, FileText, FolderOpen, Plus, Save, X } from 'lucide-react'
 import { formatCurrency } from '@/domain/ledger/money'
 import { sortEntries } from '@/domain/ledger/selectors'
 import type { LedgerApi } from '@/features/ledger/use-ledger'
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 
 interface LedgerTreeProps {
   onSelectDate(id: string, date: string): void
+  onNewEntry(id: string): void
   ledger: LedgerApi
 }
 
@@ -45,7 +46,7 @@ function TreeAction({
   )
 }
 
-export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
+export function LedgerTree({ ledger, onSelectDate, onNewEntry }: LedgerTreeProps) {
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set([ledger.selectedLedgerId]))
 
   useEffect(() => {
@@ -146,11 +147,11 @@ export function LedgerTree({ ledger, onSelectDate }: LedgerTreeProps) {
                       <Save />
                     </TreeAction>
                     <TreeAction
-                      label="另存为"
+                      label="新建账目"
                       disabled={fileActionsDisabled}
-                      onClick={() => void ledger.saveAs(item.id)}
+                      onClick={() => onNewEntry(item.id)}
                     >
-                      <Copy />
+                      <Plus />
                     </TreeAction>
                     <TreeAction
                       label="关闭账本"
