@@ -68,7 +68,7 @@ React 状态保存多个账本会话、当前账本及账目选择和筛选条�
 
 文件树“新建账目”和右下角“+”共用 `App` 的卡片开关；文件树入口同时传入目标账本 ID，切换后复用该账本的表单与保存流程。侧栏品牌区底部和设置区顶部使用 `border-sidebar-border` 主题 token。
 
-品牌图标使用 `public/favicon.svg` 与 `public/favicon-dark.svg`。HTML 初始化脚本按系统偏好选择标签页图标，`useTheme` 在页面主题变更时同步更新；侧栏读取同一主题状态。资源路径兼容 Vite `BASE_URL` 子路径部署。
+品牌图标使用 `public/favicon.svg` 与 `public/favicon-dark.svg`。HTML 初始化脚本按系统偏好选择标签页图标，`useTheme` 在页面主题变更时同步更新；侧栏读取同一主题状态。资源路径兼容 Vite `BASE_URL` 子路径部署。README 通过 `picture` 选择深浅色图标。
 
 主色由独立于币种的全局主题色设置决定，提供紫色、青色、蓝色、玫红、琥珀和绿色六套深浅色配色。图标使用 `components.json` 中配置的 Lucide 图标库；按钮、提示、卡片和弹层统一组合 shadcn 基础组件。主题颜色集中在 CSS 变量中，深浅色分别配置卡片、边框、文字和图表色。每次打开页面使用系统颜色偏好，手动切换保留在 React 状态中；HTML 中的初始化脚本在 React 渲染前应用深浅模式，减少闪烁。全局设置通过 Dialog 覆盖主页面，保存后一次性应用币种、主题色、深浅模式和默认目录。默认目录句柄仅保存在当前页面会话，并作为 `showSaveFilePicker` 的 `startIn`。账目、筛选、主题和目录都只在当前页面存续。
 
