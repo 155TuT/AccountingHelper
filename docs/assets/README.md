@@ -8,7 +8,7 @@
 
 | 文件                                                       | 博客位置与用途                                  | 来源                                                                                                               |
 | ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [product-overview-light.jpg](product-overview-light.jpg)   | 3.1：浅色总览、三笔账目、收支汇总和分类分析     | [GitHub Pages](https://155TuT.github.io/AccountingHelper/)，打开 `examples/acceptance.jsonl`                       |
+| [product-overview-light.jpg](product-overview-light.jpg)   | 3.1：浅色总览、三笔账目、收支汇总和分类分析     | [GitHub Pages](https://155TuT.github.io/AccountingHelper/)，打开三笔验收账                                         |
 | [product-entry-currency.jpg](product-entry-currency.jpg)   | 3.2：浮动记账卡片与六币种入口                   | 同一账本，输入 25.50 和“午餐”后展开币种面板，截图后取消                                                            |
 | [product-filter.jpg](product-filter.jpg)                   | 3.3：类别与金额边界取交集                       | 同一账本，类别“饮食”，金额上下限均为 25.50，结果一笔                                                               |
 | [product-overview-dark.jpg](product-overview-dark.jpg)     | 3.4：深色、折线走势和支出条形图                 | 同一账本，切换深色、折线图与分类支出条形图                                                                         |
@@ -20,7 +20,7 @@
 | [github-pages-deployment.jpg](github-pages-deployment.jpg) | 4.2：构建、部署成功与在线地址                   | [部署任务 42381589242](https://github.com/155TuT/AccountingHelper/actions/runs/42381589242)                        |
 | [github-ci.jpg](github-ci.jpg)                             | 第七节：两项版本检查和七项模块测试              | [CI 任务 42381589269](https://github.com/155TuT/AccountingHelper/actions/runs/42381589269)，9 项任务全部成功       |
 
-产品截图的数据来自独立验收文件。截图后刷新演示页面，恢复空工作台；示例文件保留原有三笔记录。截图内容与正文中的金额、主题、PR 数量和工作流版本对应。
+产品截图的数据来自[三笔验收账](../../test/fixtures/prd-ledger.jsonl)，现保留在测试目录。截图后刷新演示页面，恢复空工作台。截图内容与正文中的金额、主题、PR 数量和工作流版本对应。
 
 ## 开发截图清理
 

@@ -30,6 +30,8 @@ npm run dev
 
 文件读写通过浏览器的 File System Access API 完成，需要用户授权以及 localhost 或 HTTPS 环境。账目仅持久保存在所选 JSONL 文件中；页面会话结束后清空账目、筛选、币种和主题状态，下次打开从空工作台开始。仅类别目录通过 `localStorage` 跨刷新保留。
 
+周、月虚构人民币案例分别位于 [校园一周](examples/campus-week-2026-10-26.jsonl)（39 笔）和 [城市生活一月](examples/city-month-2026-10.jsonl)（154 笔）；三笔 PRD 验收数据保存在 `test/fixtures/prd-ledger.jsonl`。
+
 ## 当前功能
 
 - 多账本文件树、按日期筛选、账目表格定位与右下角浮动记账卡片。
@@ -68,7 +70,7 @@ src/
 ├── lib/                     # 样式工具
 └── styles/                  # 主题 token 和全局样式
 docs/                        # 需求、架构、格式和验收说明
-examples/                    # 可打开的 JSONL 验收账本
+examples/                    # 周、月生活案例账本
 ```
 
 业务规则放在 `domain`，文件接口放在 `infrastructure`，交互流程放在 `features`，页面通过 `app` 组装。模块测试与被测模块同目录，跨模块验收位于 `test/`。

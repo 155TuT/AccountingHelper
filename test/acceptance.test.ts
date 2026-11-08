@@ -1,6 +1,6 @@
 import { categoryNames, createDefaultCategoryCatalog } from '@/domain/ledger/categories'
 import { describe, expect, it } from 'vitest'
-import rawAcceptanceText from '../examples/acceptance.jsonl?raw'
+import rawAcceptanceText from './fixtures/prd-ledger.jsonl?raw'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { formatCurrency, formatMoney, parseMoney } from '@/domain/ledger/money'
 import {
