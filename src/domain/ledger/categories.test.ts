@@ -4,6 +4,7 @@ import {
   categoryNames,
   createDefaultCategoryCatalog,
   DEFAULT_CATEGORY_CATALOG,
+  filterCategoryCatalog,
   removeCategory,
   renameCategory,
   sanitizeCategoryCatalog,
@@ -64,5 +65,18 @@ describe('本地类别目录', () => {
     expect(sanitized.expense).toEqual(['自定义'])
     expect(sanitized.income.length).toBeGreaterThan(0)
     expect(sanitized.income).toContain('工资')
+  })
+  it('按收支类型合并历史类别，同名类别可分别出现在两组', () => {
+    const catalog: CategoryCatalog = { income: ['工资'], expense: ['饮食'] }
+    expect(
+      filterCategoryCatalog(catalog, [
+        { type: 'income', category: '其他' },
+        { type: 'expense', category: '其他' },
+        { type: 'expense', category: '饮食' },
+        { type: 'expense', category: '旧类别' },
+        { type: 'expense', category: '旧类别' },
+      ]),
+    ).toEqual({ income: ['工资', '其他'], expense: ['饮食', '其他', '旧类别'] })
+    expect(catalog).toEqual({ income: ['工资'], expense: ['饮食'] })
   })
 })

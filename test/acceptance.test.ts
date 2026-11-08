@@ -27,7 +27,14 @@ describe('PRD 验收账本', () => {
   it('三笔示例记录解析后得到 100.00 收入、27.50 支出和 72.50 结余', () => {
     expect(entries).toHaveLength(3)
     expect(summarize(entries)).toEqual({ income: 10000, expense: 2750, balance: 7250 })
-    expect(summarize(filterEntries(entries, { ...EMPTY_FILTERS, category: '饮食' }))).toEqual({
+    expect(
+      summarize(
+        filterEntries(entries, {
+          ...EMPTY_FILTERS,
+          categories: [{ type: 'expense', category: '饮食' }],
+        }),
+      ),
+    ).toEqual({
       income: 0,
       expense: 2550,
       balance: -2550,
@@ -48,7 +55,12 @@ describe('PRD 验收账本', () => {
     expect(
       filterEntries(entries, { ...EMPTY_FILTERS, maxAmount: '2.00' }).map((entry) => entry.id),
     ).toEqual(['acceptance-2'])
-    expect(filterEntries(entries, { ...EMPTY_FILTERS, category: '工资' })).toHaveLength(1)
+    expect(
+      filterEntries(entries, {
+        ...EMPTY_FILTERS,
+        categories: [{ type: 'income', category: '工资' }],
+      }),
+    ).toHaveLength(1)
   })
 
   it('最近记录按日期、录入时刻和标识稳定倒序，且不修改原数组', () => {
@@ -79,7 +91,10 @@ describe('PRD 验收账本', () => {
       { category: '饮食', amount: 2550 },
       { category: '交通', amount: 200 },
     ])
-    const filtered = filterEntries(entries, { ...EMPTY_FILTERS, category: '交通' })
+    const filtered = filterEntries(entries, {
+      ...EMPTY_FILTERS,
+      categories: [{ type: 'expense', category: '交通' }],
+    })
     expect(summarize(filtered)).toEqual({ income: 0, expense: 200, balance: -200 })
     expect(categoryTotals(filtered)).toEqual([{ category: '交通', amount: 200 }])
   })
@@ -218,7 +233,12 @@ describe('筛选与统计异常', () => {
 
   it('自定义类别可筛选，非法日期和颠倒区间给出明确错误', () => {
     expect(() => validateFilters({ ...EMPTY_FILTERS, startDate: '2026-02-30' })).toThrow('有效日期')
-    expect(filterEntries(entries, { ...EMPTY_FILTERS, category: '自定义类别' })).toEqual([])
+    expect(
+      filterEntries(entries, {
+        ...EMPTY_FILTERS,
+        categories: [{ type: 'expense', category: '自定义类别' }],
+      }),
+    ).toEqual([])
     expect(() => validateFilters({ ...EMPTY_FILTERS, minAmount: '-1' })).toThrow()
     expect(() =>
       validateFilters({ ...EMPTY_FILTERS, startDate: '2026-11-08', endDate: '2026-11-07' }),

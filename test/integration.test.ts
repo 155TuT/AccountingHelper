@@ -9,6 +9,7 @@ import {
 } from '@/domain/ledger/categories'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { categoryBreakdown, filterEntries, summarize } from '@/domain/ledger/selectors'
+import type { LedgerFilters } from '@/domain/ledger/types'
 import { createEntry } from '@/domain/ledger/validation'
 import { parseJsonl, serializeJsonl } from '@/infrastructure/storage/jsonl'
 const entry = createEntry(
@@ -34,7 +35,7 @@ describe('类别、币种与文件联调', () => {
     const display = projectEntries(raw, 'CNY')
     const filtered = filterEntries(display, {
       ...EMPTY_FILTERS,
-      category: '旧类别',
+      categories: [{ type: 'expense', category: '旧类别' }],
       minAmount: '25.50',
       maxAmount: '71',
     })
@@ -75,9 +76,18 @@ describe('类别、币种与文件联调', () => {
     expect(parseJsonl(serializeJsonl(raw))[0]!.amountCents).toBe(1)
   })
   it('切换金额筛选口径不插入千分位，溢出时不改写原条件', () => {
-    const filters = { ...EMPTY_FILTERS, minAmount: '1000', maxAmount: '2000' }
+    const filters: LedgerFilters = {
+      ...EMPTY_FILTERS,
+      minAmount: '1000',
+      maxAmount: '2000',
+      categories: [
+        { type: 'expense', category: '旧类别' },
+        { type: 'income', category: '工资' },
+      ],
+    }
     const converted = convertFilters(filters, 'USD', 'CNY')
     expect(converted).toMatchObject({ minAmount: '7100.00', maxAmount: '14200.00' })
+    expect(converted.categories).toEqual(filters.categories)
     expect(() => filterEntries([], converted)).not.toThrow()
     const huge = { ...filters, maxAmount: '90071992547409.91' }
     expect(() => convertFilters(huge, 'GBP', 'JPY')).toThrow()

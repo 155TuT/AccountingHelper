@@ -44,9 +44,19 @@ export function filterEntries(
     (entry) =>
       (!filters.startDate || entry.date >= filters.startDate) &&
       (!filters.endDate || entry.date <= filters.endDate) &&
-      (!filters.category || entry.category === filters.category) &&
+      (!filters.categories.length ||
+        filters.categories.some(
+          (selected) => selected.type === entry.type && selected.category === entry.category,
+        )) &&
       entry.amountCents >= min &&
       entry.amountCents <= max,
+  )
+}
+
+export function countActiveFilters(filters: LedgerFilters): number {
+  return (
+    [filters.startDate, filters.endDate, filters.minAmount, filters.maxAmount].filter(Boolean)
+      .length + Number(filters.categories.length > 0)
   )
 }
 

@@ -23,10 +23,15 @@ export interface EntryDraft {
   note: string
 }
 
+export interface CategoryFilter {
+  type: EntryType
+  category: string
+}
+
 export interface LedgerFilters {
   startDate: string
   endDate: string
-  category: string
+  categories: readonly CategoryFilter[]
   minAmount: string
   maxAmount: string
 }

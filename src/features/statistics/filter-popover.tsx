@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CategoryPicker } from '@/features/categories/category-picker'
 import { useExclusivePopup } from '@/hooks/use-exclusive-popup'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
-import { validateFilters } from '@/domain/ledger/selectors'
-import type { LedgerFilters } from '@/domain/ledger/types'
+import { countActiveFilters, validateFilters } from '@/domain/ledger/selectors'
+import type { CategoryCatalog, LedgerFilters } from '@/domain/ledger/types'
+import { CategoryFilterPicker } from './category-filter-picker'
 
 export function FilterPopover({
   filters,
@@ -21,7 +21,7 @@ export function FilterPopover({
 }: {
   filters: LedgerFilters
   currency: CurrencyCode
-  categories: readonly string[]
+  categories: CategoryCatalog
   onApply(filters: LedgerFilters): void
 }) {
   const [open, setOpen] = useState(false)
@@ -29,13 +29,9 @@ export function FilterPopover({
   const [draft, setDraft] = useState(filters)
   const [error, setError] = useState('')
   const unit = currencyInfo(currency).unit
-  const count = Object.values(filters).filter(Boolean).length
-  const options =
-    draft.category && !categories.includes(draft.category)
-      ? [draft.category, ...categories]
-      : categories
+  const count = countActiveFilters(filters)
 
-  function update(key: keyof LedgerFilters, value: string) {
+  function update<K extends keyof LedgerFilters>(key: K, value: LedgerFilters[K]) {
     setDraft((current) => ({ ...current, [key]: value }))
     setError('')
   }
@@ -83,9 +79,13 @@ export function FilterPopover({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-[480px] p-6" aria-label="筛选账目">
-          <form onSubmit={apply} noValidate className="space-y-5">
-            <FieldGroup className="grid grid-cols-2 gap-5">
+        <PopoverContent
+          align="end"
+          className="w-[480px] rounded-2xl p-(--panel-padding)"
+          aria-label="筛选账目"
+        >
+          <form onSubmit={apply} noValidate className="space-y-(--panel-gap)">
+            <FieldGroup className="grid grid-cols-2 gap-(--panel-gap)">
               <Field>
                 <FieldLabel htmlFor="filter-start">开始日期</FieldLabel>
                 <DatePicker
@@ -112,6 +112,7 @@ export function FilterPopover({
                 <FieldLabel htmlFor="filter-min">最低金额（{unit}）</FieldLabel>
                 <Input
                   id="filter-min"
+                  className="h-10 rounded-lg"
                   inputMode="decimal"
                   placeholder="不限"
                   value={draft.minAmount}
@@ -122,6 +123,7 @@ export function FilterPopover({
                 <FieldLabel htmlFor="filter-max">最高金额（{unit}）</FieldLabel>
                 <Input
                   id="filter-max"
+                  className="h-10 rounded-lg"
                   inputMode="decimal"
                   placeholder="不限"
                   value={draft.maxAmount}
@@ -130,12 +132,11 @@ export function FilterPopover({
               </Field>
               <Field className="col-span-2">
                 <FieldLabel htmlFor="filter-category">类别</FieldLabel>
-                <CategoryPicker
+                <CategoryFilterPicker
                   id="filter-category"
-                  value={draft.category}
-                  categories={options}
-                  onChange={(value) => update('category', value)}
-                  optional
+                  value={draft.categories}
+                  categories={categories}
+                  onChange={(value) => update('categories', value)}
                   {...popupProps('category')}
                 />
               </Field>
@@ -172,7 +173,12 @@ export function ActiveFilters({
   const labels = [
     (filters.startDate || filters.endDate) &&
       `${filters.startDate || '最早'} 至 ${filters.endDate || '至今'}`,
-    filters.category,
+    ...(['income', 'expense'] as const).map((type) => {
+      const names = filters.categories
+        .filter((item) => item.type === type)
+        .map((item) => item.category)
+      return names.length ? `${type === 'income' ? '收入' : '支出'}：${names.join('、')}` : ''
+    }),
     (filters.minAmount || filters.maxAmount) &&
       `${symbol}${filters.minAmount || '0'} — ${filters.maxAmount ? `${symbol}${filters.maxAmount}` : '不限'}`,
   ].filter(Boolean)
@@ -180,7 +186,11 @@ export function ActiveFilters({
   return (
     <div className="flex flex-wrap gap-2" aria-label="当前筛选条件">
       {labels.map((label) => (
-        <Badge variant="secondary" className="px-3 py-1.5 text-sm font-normal" key={String(label)}>
+        <Badge
+          variant="secondary"
+          className="max-w-full px-3 py-1.5 text-sm font-normal whitespace-normal"
+          key={String(label)}
+        >
           {label}
         </Badge>
       ))}

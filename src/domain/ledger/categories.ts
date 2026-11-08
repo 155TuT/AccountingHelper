@@ -108,6 +108,17 @@ export function categoryNames(
   return names
 }
 
+export function filterCategoryCatalog(
+  catalog: CategoryCatalog,
+  entries: readonly Pick<LedgerEntry, 'type' | 'category'>[] = [],
+): CategoryCatalog {
+  const groups: CategoryCatalog = { income: [...catalog.income], expense: [...catalog.expense] }
+  for (const entry of entries) {
+    if (!groups[entry.type].includes(entry.category)) groups[entry.type].push(entry.category)
+  }
+  return groups
+}
+
 function usableStoredName(value: unknown): string | null {
   if (typeof value !== 'string') return null
   const name = value.trim()

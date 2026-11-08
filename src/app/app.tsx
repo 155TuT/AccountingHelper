@@ -21,9 +21,9 @@ import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { type CurrencyCode } from '@/domain/currency/currencies'
 import { convertFilters, projectEntries } from '@/domain/currency/projection'
-import { categoryNames } from '@/domain/ledger/categories'
+import { filterCategoryCatalog } from '@/domain/ledger/categories'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
-import { filterEntries, summarize } from '@/domain/ledger/selectors'
+import { countActiveFilters, filterEntries, summarize } from '@/domain/ledger/selectors'
 import type { EntryDraft } from '@/domain/ledger/types'
 import { useCategories } from '@/features/categories/use-categories'
 import { useCurrency } from '@/features/currency/use-currency'
@@ -68,8 +68,8 @@ export function App() {
       }
     }
   }, [selected.entries, filters, currency])
-  const hasFilters = Object.values(filters).some(Boolean)
-  const filterCategories = categoryNames(categories, selected.entries)
+  const hasFilters = countActiveFilters(filters) > 0
+  const filterCategories = filterCategoryCatalog(categories, selected.entries)
 
   function resetView() {
     setFilters({ ...EMPTY_FILTERS })

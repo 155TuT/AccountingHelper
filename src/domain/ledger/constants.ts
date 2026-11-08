@@ -3,7 +3,7 @@ import type { LedgerFilters } from './types'
 export const EMPTY_FILTERS: LedgerFilters = {
   startDate: '',
   endDate: '',
-  category: '',
+  categories: [],
   minAmount: '',
   maxAmount: '',
 }
