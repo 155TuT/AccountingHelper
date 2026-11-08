@@ -69,6 +69,7 @@ export function sortEntries(entries: readonly LedgerEntry[]): LedgerEntry[] {
   )
 }
 
+/** 各日收支与截至当天的累计结余，以传入账目为统计范围。 */
 export function dailyTotals(entries: readonly LedgerEntry[]) {
   summarize(entries)
   const days = new Map<string, { date: string; income: number; expense: number }>()
@@ -77,7 +78,13 @@ export function dailyTotals(entries: readonly LedgerEntry[]) {
     day[entry.type] += entry.amountCents
     days.set(entry.date, day)
   }
-  return [...days.values()].sort((a, b) => a.date.localeCompare(b.date))
+  let balance = 0
+  return [...days.values()]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((day) => {
+      balance += day.income - day.expense
+      return { ...day, balance }
+    })
 }
 
 export function categoryTotals(entries: readonly LedgerEntry[]) {

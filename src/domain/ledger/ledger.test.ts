@@ -160,6 +160,41 @@ describe('账目筛选和统计', () => {
       }),
     ).toBe(2)
   })
+  it('按日期累计结余，同日收支相等时延续前日结余', () => {
+    const records: LedgerEntry[] = [
+      ...entries,
+      { ...entries[0]!, id: '4', date: '2026-11-08', amountCents: 500 },
+      { ...entries[2]!, id: '5', date: '2026-11-08', amountCents: 500 },
+    ]
+    const days = dailyTotals([...records].reverse())
+    expect(days).toEqual([
+      { date: '2026-11-06', income: 0, expense: 2550, balance: -2550 },
+      { date: '2026-11-07', income: 10000, expense: 200, balance: 7250 },
+      { date: '2026-11-08', income: 500, expense: 500, balance: 7250 },
+    ])
+    expect(days.at(-1)?.balance).toBe(summarize(records).balance)
+    expect(dailyTotals([])).toEqual([])
+  })
+  it('累计结余可回到零或负数，筛选后末日结余与汇总一致', () => {
+    const records: LedgerEntry[] = [
+      ...entries,
+      { ...entries[0]!, id: '4', date: '2026-11-08', amountCents: 7250 },
+      { ...entries[0]!, id: '5', date: '2026-11-09', amountCents: 300 },
+      { ...entries[2]!, id: '6', date: '2026-11-10', amountCents: 1000 },
+    ]
+    expect(dailyTotals(records).map((day) => day.balance)).toEqual([-2550, 7250, 0, -300, 700])
+    const filtered = filterEntries(records, {
+      ...EMPTY_FILTERS,
+      startDate: '2026-11-07',
+      endDate: '2026-11-09',
+    })
+    const days = dailyTotals(filtered)
+    expect(days.map((day) => day.balance)).toEqual([9800, 2550, 2250])
+    expect(days.at(-1)?.balance).toBe(summarize(filtered).balance)
+    expect(dailyTotals([entries[0]!])).toEqual([
+      { date: '2026-11-06', income: 0, expense: 2550, balance: -2550 },
+    ])
+  })
   it('图表与汇总共用相同账目口径', () => {
     const days = dailyTotals(entries)
     expect(days.reduce((sum, day) => sum + day.expense, 0)).toBe(2750)

@@ -84,8 +84,8 @@ describe('PRD 验收账本', () => {
 
   it('图表与汇总使用同一批筛选结果', () => {
     expect(dailyTotals(entries)).toEqual([
-      { date: '2026-11-06', income: 0, expense: 2550 },
-      { date: '2026-11-07', income: 10000, expense: 200 },
+      { date: '2026-11-06', income: 0, expense: 2550, balance: -2550 },
+      { date: '2026-11-07', income: 10000, expense: 200, balance: 7250 },
     ])
     expect(categoryTotals(entries)).toEqual([
       { category: '饮食', amount: 2550 },

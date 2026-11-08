@@ -1,5 +1,15 @@
 import { ChartBar, ChartColumn, ChartLine, ChartPie } from 'lucide-react'
-import { Bar, CartesianGrid, ComposedChart, Line, Pie, PieChart, XAxis, YAxis } from 'recharts'
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  Pie,
+  PieChart,
+  ReferenceLine,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ChartContainer,
@@ -14,14 +24,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/domain/ledger/money'
 import { categoryBreakdown, dailyTotals } from '@/domain/ledger/selectors'
 import type { CurrencyCode } from '@/domain/currency/currencies'
-import type { EntryType, LedgerEntry } from '@/domain/ledger/types'
+import type { EntryType, LedgerEntry, LedgerMetric } from '@/domain/ledger/types'
 import { cn } from '@/lib/utils'
 
 const trendConfig = {
   income: { label: '收入', color: 'var(--income)' },
   expense: { label: '支出', color: 'var(--expense)' },
+  balance: { label: '累计结余', color: 'var(--chart-4)' },
 } satisfies ChartConfig
-const series = ['income', 'expense'] as const
+const series = ['income', 'expense', 'balance'] as const
 const trendStyles = [
   { value: 'bar', label: '柱状图', Icon: ChartColumn },
   { value: 'line', label: '折线图', Icon: ChartLine },
@@ -35,18 +46,21 @@ export function TrendChart({
   entries,
   currency,
   hasFilters,
+  metric = null,
 }: {
   entries: readonly LedgerEntry[]
   currency: CurrencyCode
   hasFilters: boolean
+  metric?: LedgerMetric | null
 }) {
   const data = dailyTotals(entries)
+  const visibleSeries = metric ? [metric] : series
   const spansYears = data[0]?.date.slice(0, 4) !== data.at(-1)?.date.slice(0, 4)
 
   return (
     <Card className="min-w-0">
       <Tabs defaultValue="bar" className="gap-5">
-        <CardHeader className="border-b">
+        <CardHeader>
           <CardTitle role="heading" aria-level={2} className="text-lg">
             收支走势
           </CardTitle>
@@ -68,7 +82,7 @@ export function TrendChart({
                 <ChartContainer config={trendConfig} className="h-[386px] w-full">
                   <ComposedChart
                     accessibilityLayer
-                    aria-label={`每日收支${label}`}
+                    aria-label={`每日${metric ? trendConfig[metric].label : '收支'}${label}`}
                     data={data}
                     barGap={4}
                     margin={{ top: 12, right: 12, bottom: 0, left: 0 }}
@@ -110,7 +124,8 @@ export function TrendChart({
                       }
                     />
                     <ChartLegend content={<ChartLegendContent />} />
-                    {series.map((key) =>
+                    <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeOpacity={0.5} />
+                    {visibleSeries.map((key) =>
                       value === 'bar' ? (
                         <Bar
                           key={key}
@@ -125,11 +140,13 @@ export function TrendChart({
                         <Line
                           key={key}
                           dataKey={key}
+                          type="monotone"
                           name={trendConfig[key].label}
                           stroke={`var(--color-${key})`}
                           strokeWidth={2.5}
                           strokeDasharray={key === 'expense' ? '5 3' : undefined}
-                          dot={data.length <= 14 ? { r: 3, fill: `var(--color-${key})` } : false}
+                          dot={data.length === 1 ? { r: 3, fill: `var(--color-${key})` } : false}
+                          activeDot={{ r: 5 }}
                           isAnimationActive={false}
                         />
                       ),
@@ -212,7 +229,7 @@ export function CategoryChart({
               {data.length ? (
                 <div
                   className={cn(
-                    'grid min-h-52 items-center gap-4',
+                    'grid min-h-52 items-start gap-4',
                     value === 'donut' && '@min-[340px]:grid-cols-[132px_minmax(0,1fr)]',
                   )}
                 >

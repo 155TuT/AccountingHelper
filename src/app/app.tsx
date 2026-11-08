@@ -24,7 +24,7 @@ import { convertFilters, projectEntries } from '@/domain/currency/projection'
 import { filterCategoryCatalog } from '@/domain/ledger/categories'
 import { EMPTY_FILTERS } from '@/domain/ledger/constants'
 import { countActiveFilters, filterEntries, summarize } from '@/domain/ledger/selectors'
-import type { EntryDraft } from '@/domain/ledger/types'
+import type { EntryDraft, LedgerMetric } from '@/domain/ledger/types'
 import { useCategories } from '@/features/categories/use-categories'
 import { useCurrency } from '@/features/currency/use-currency'
 import { EntryComposer } from '@/features/entries/entry-composer'
@@ -50,6 +50,7 @@ export function App() {
   const { currency, setCurrency } = useCurrency()
   const { categories, actions } = useCategories()
   const [view, setView] = useState<View>('overview')
+  const [trendMetric, setTrendMetric] = useState<LedgerMetric | null>(null)
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS })
   const [addOpen, setAddOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -74,6 +75,7 @@ export function App() {
   function resetView() {
     setFilters({ ...EMPTY_FILTERS })
     setView('overview')
+    setTrendMetric(null)
   }
   const navigation = {
     ...ledger,
@@ -84,6 +86,7 @@ export function App() {
     },
     selectEntry(ledgerId: string, entryId: string) {
       if (ledger.isBusy) return
+      if (ledgerId !== selected.id) setTrendMetric(null)
       ledger.selectEntry(ledgerId, entryId)
       setEntryFocusKey((current) => current + 1)
       setFilters({ ...EMPTY_FILTERS })
@@ -150,6 +153,7 @@ export function App() {
         onNewEntry={(id) => changeEntryOpen(true, id)}
         onSelectDate={(id, date) => {
           if (ledger.isBusy) return
+          if (id !== selected.id) setTrendMetric(null)
           ledger.selectLedger(id)
           setFilters({ ...EMPTY_FILTERS, startDate: date, endDate: date })
           setView('entries')
@@ -269,26 +273,37 @@ export function App() {
             ) : (
               <>
                 <ActiveFilters filters={filters} currency={currency} />
-                <SummaryCards totals={display.totals!} currency={currency} />
                 {view === 'overview' && (
                   <Suspense fallback={<Skeleton className="h-[386px] rounded-xl" />}>
                     <TrendChart
                       entries={display.entries}
                       currency={currency}
                       hasFilters={hasFilters}
+                      metric={trendMetric}
                     />
                   </Suspense>
                 )}
+                <SummaryCards
+                  totals={display.totals!}
+                  currency={currency}
+                  activeMetric={trendMetric}
+                  onMetricChange={(metric) => {
+                    setTrendMetric((current) => (current === metric ? null : metric))
+                    setView('overview')
+                  }}
+                />
               </>
             )}
-            <EntryTable
-              key={`${selected.id}-${entryFocusKey}-${ledger.selectedEntryId}-${view}-${JSON.stringify(filters)}`}
-              entries={display.entries}
-              selectedEntryId={ledger.selectedEntryId}
-              showAll={view === 'entries'}
-              hasFilters={!display.error && hasFilters}
-              onViewAll={() => setView('entries')}
-            />
+            {(view === 'entries' || display.error) && (
+              <EntryTable
+                key={`${selected.id}-${entryFocusKey}-${ledger.selectedEntryId}-${view}-${JSON.stringify(filters)}`}
+                entries={display.entries}
+                selectedEntryId={ledger.selectedEntryId}
+                showAll
+                hasFilters={!display.error && hasFilters}
+                onViewAll={() => setView('entries')}
+              />
+            )}
             {view === 'overview' && display.totals && (
               <section aria-label="分类分析" className="grid gap-6 @min-[760px]:grid-cols-2">
                 <Suspense fallback={<Skeleton className="h-[310px] rounded-xl" />}>

@@ -42,6 +42,8 @@ export interface LedgerTotals {
   balance: number
 }
 
+export type LedgerMetric = keyof LedgerTotals
+
 export type CategoryCatalog = Record<EntryType, string[]>
 
 export interface CategoryActions {

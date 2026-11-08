@@ -22,7 +22,7 @@ React 状态保存多个账本会话、当前账本及账目选择和筛选条�
 | `domain/currency`        | 六种币种、参考换算、展示投影与筛选阈值换算       | `currencies.ts`、`projection.ts`                                         |
 | `features/currency`      | 全局币种和选择器                                 | `use-currency.ts`、`currency-picker.tsx`                                 |
 | `features/ledger`        | 当前账本、默认目录、异步状态与错误反馈           | `workspace.ts`、`use-ledger.ts`、`ledger-tree.tsx`                       |
-| `features/entries`       | 记账表单、最近记录与分页表格                     | `entry-composer.tsx`、`entry-form.tsx`、`entry-table.tsx`                |
+| `features/entries`       | 记账表单与分页表格                               | `entry-composer.tsx`、`entry-form.tsx`、`entry-table.tsx`                |
 | `features/settings`      | 全局币种、主题和默认目录草稿                     | `settings-dialog.tsx`                                                    |
 | `features/statistics`    | 筛选表单、汇总和图表                             | `filter-popover.tsx`、`summary-cards.tsx`、`charts.tsx`                  |
 | `features/theme`         | 当前页面的主题色与深浅模式                       | `use-theme.ts`                                                           |
@@ -54,7 +54,13 @@ React 状态保存多个账本会话、当前账本及账目选择和筛选条�
 
 总览卡片、收支走势、分类收支图表和表格共用同一份筛选结果。收支分别累加，结余为收入减支出。`categoryBreakdown` 按收支类型汇总分类金额和笔数，分类占比分别以当前筛选下的收入或支出合计为分母。
 
-收支走势可切换柱状图与折线图，分类收入与分类支出可分别切换环形图与条形图。图表样式只保留在当前组件会话中。最近记录按记账日期倒序，同日按录入时刻倒序；全部账目每页 10 笔。
+收支总览依次展示走势、三张汇总卡片和分类分析；走势标题与图表通过间距分隔。“全部账目”保留汇总与分页表格，展示换算溢出时仍提供原币表格。分类卡片内容使用顶端对齐的 Grid，固定尺寸的环形图不随旁边类别列表的高度居中移动。
+
+`dailyTotals` 先按日期汇总每日收入与支出，再按日期升序累计结余。每个点表示传入账目中截至当天的累计收入减累计支出，保留负值；末日结余与同批账目的 `summarize` 结果一致。`App` 保存当前 `LedgerMetric`，空值表示同时显示三项；汇总卡片以可聚焦按钮切换单项走势，再次点击取消选择，切换账本时重置。该选择只改变走势图中的系列，不改变筛选结果或汇总金额。
+
+收支走势可切换柱状图与折线图，分类收入与分类支出可分别切换环形图与条形图。图表样式只保留在当前组件会话中。账目按记账日期倒序，同日按录入时刻倒序；全部账目每页 10 笔。
+
+折线沿用 [shadcn 多折线示例](https://ui.shadcn.com/charts/line) 的 `monotone` 插值与悬停圆点，保留收支主题色和虚实线区分。单日数据保留固定圆点，绘制方式不改变 `dailyTotals` 的日期与金额。
 
 ## UI 与主题
 
