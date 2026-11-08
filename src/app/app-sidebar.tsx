@@ -31,12 +31,12 @@ export function AppSidebar({
 }: AppSidebarProps) {
   return (
     <Sidebar collapsible="none" className="sticky top-0 h-svh shrink-0 border-r">
-      <SidebarHeader className="h-(--toolbar-height) justify-center px-5">
+      <SidebarHeader className="h-(--toolbar-height) justify-center border-b border-sidebar-border px-5">
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-2.5 px-1">
               <img
-                src={`${import.meta.env.BASE_URL}favicon.svg`}
+                src={`${import.meta.env.BASE_URL}${theme === 'dark' ? 'favicon-dark.svg' : 'favicon.svg'}`}
                 alt=""
                 width={36}
                 height={36}
@@ -52,7 +52,7 @@ export function AppSidebar({
           <LedgerTree ledger={ledger} onSelectDate={onSelectDate} />
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t px-3 py-2">
+      <SidebarFooter className="border-t border-sidebar-border px-3 py-2">
         <div className="flex items-center justify-between">
           <Tooltip>
             <TooltipTrigger asChild>

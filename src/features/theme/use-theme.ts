@@ -26,6 +26,12 @@ export function useTheme() {
     document.documentElement.style.colorScheme = theme
     document.documentElement.dataset.themeColor = themeColor
     document
+      .querySelector('link[rel="icon"]')
+      ?.setAttribute(
+        'href',
+        `${import.meta.env.BASE_URL}${theme === 'dark' ? 'favicon-dark.svg' : 'favicon.svg'}`,
+      )
+    document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute(
         'content',
